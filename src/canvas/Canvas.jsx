@@ -31,13 +31,7 @@ function useNoRightClickMenu(canvasRef) {
 }
 
 function useCtx(canvasRef) {
-  const [ctx, setCtx] = React.useState();
-
-  React.useEffect(() => {
-    setCtx(canvasRef.current.getContext('2d'));
-  }, []);
-
-  return ctx;
+  return React.useMemo(() => canvasRef.current?.getContext('2d'), [canvasRef.current]);
 }
 
 function useZoomOnMouseWheel(canvasRef) {
@@ -53,14 +47,11 @@ function useZoomOnMouseWheel(canvasRef) {
   }, []);
 }
 
-const LEFT_MOUSE_BUTTON = 0;
-
 function useDragToScroll(canvasRef) {
   const dispatch = useDispatch();
   let prevMouse = null;
 
   const mousedown = (e) => {
-    if (e.button !== LEFT_MOUSE_BUTTON) return;
     prevMouse = [e.offsetX, -e.offsetY];
     canvasRef.current.addEventListener('mousemove', mousemove);
     canvasRef.current.addEventListener('mouseup', mouseup);
@@ -95,53 +86,33 @@ function clearCanvas(ctx) {
   ctx.clearRect(0, 0, grid.width, grid.height);
 }
 
-function useAllDrawings(ctx) {
+function drawChildren(ctx, children) {
+  React.Children.forEach(children, ({ type: drawingFn, props }) => {
+    const revertStyles = props.style && revertablyAssign(ctx, props.style);
+    drawingFn(props, ctx);
+    revertStyles?.();
+  });
+}
+
+function useAllDrawings(ctx, children) {
   const grid = useSelector((state) => state.grid);
 
   React.useEffect(() => {
-    if (!ctx) return;
+    if (!ctx) return; // for the very first render, before canvasRef.current gets a value
 
     function drawAll() {
       clearCanvas(ctx);
       drawGridLines(ctx);
-      invokeDrawingFunctions(ctx);
+      drawChildren(ctx, children);
     }
 
     drawAll();
     window.addEventListener('resize', drawAll);
     return () => window.removeEventListener('resize', drawAll);
-  }, [ctx, grid]);
+  }, [grid, ctx]);
 }
 
-const drawingFunctions = new Map();
-
-function invokeDrawingFunctions(ctx) {
-  drawingFunctions.forEach((styles, fn) => {
-    const revertStyles = styles && revertablyAssign(ctx, styles);
-    fn(ctx);
-    revertStyles?.();
-  });
-}
-
-function useOurCoolApi(refToSelf) {
-  React.useImperativeHandle(refToSelf, () => ({
-    /**
-     * @param {(ctx: CanvasRenderingContext2D) => void} fn
-     * @param {Object?} styles to apply on the canvas's context before drawing
-     */
-    addDrawing: (fn, styles = null) => {
-      drawingFunctions.set(fn, styles);
-    },
-    /**
-     * @param {(ctx: CanvasRenderingContext2D) => void} fn
-     */
-    removeDrawing: (fn) => {
-      drawingFunctions.delete(fn);
-    },
-  }));
-}
-
-export default React.forwardRef((props, refToSelf) => {
+export default ({ children }) => {
   const canvasRef = React.useRef();
 
   useNoRightClickMenu(canvasRef);
@@ -150,9 +121,7 @@ export default React.forwardRef((props, refToSelf) => {
   useDragToScroll(canvasRef);
 
   const ctx = useCtx(canvasRef);
-  useAllDrawings(ctx);
+  useAllDrawings(ctx, children);
 
-  useOurCoolApi(refToSelf);
-
-  return <canvas {...props} ref={canvasRef} />;
-});
+  return <canvas ref={canvasRef} />;
+};

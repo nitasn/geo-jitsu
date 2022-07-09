@@ -4,7 +4,7 @@ import { revertablyAssign } from '../utils';
 
 /**
  * todo
- * mark numbers on axes should go rtl or ltr 
+ * mark numbers on axes should go rtl or ltr
  */
 
 import {
@@ -17,13 +17,6 @@ import {
 } from './conversions';
 
 import store from '../redux/store';
-
-function _drawLine(ctx, [x1, y1], [x2, y2]) {
-  ctx.beginPath();
-  ctx.moveTo(x1, y1);
-  ctx.lineTo(x2, y2);
-  ctx.stroke();
-}
 
 /**
  * draw a line every `units` world units.
@@ -42,27 +35,34 @@ function _drawLinesAtMultipleOf(grid, ctx, units, styles) {
   ]);
 
   const revertCtxStyles = revertablyAssign(ctx, styles);
+  ctx.beginPath();
 
   for (; nextTickX <= grid.width; nextTickX += step) {
-    _drawLine(ctx, [nextTickX, 0], [nextTickX, grid.height]);
+    ctx.moveTo(nextTickX, 0);
+    ctx.lineTo(nextTickX, grid.height);
   }
 
   for (; nextTickY <= grid.height; nextTickY += step) {
-    _drawLine(ctx, [0, nextTickY], [grid.width, nextTickY]);
+    ctx.moveTo(0, nextTickY);
+    ctx.lineTo(grid.width, nextTickY);
   }
-
+  ctx.stroke();
   revertCtxStyles();
 }
 
 function _drawTheAxes(grid, ctx, styles) {
-  const [canvas_x, canvas_y] = toCanvasCoords([0, 0]);
+  const [canvasOriginX, canvasOriginY] = toCanvasCoords([0, 0]);
 
   const revertCtxStyles = revertablyAssign(ctx, styles);
+  ctx.beginPath();
 
-  _drawLine(ctx, [canvas_x, 0], [canvas_x, grid.height]);
+  ctx.moveTo(canvasOriginX, 0);
+  ctx.lineTo(canvasOriginX, grid.height);
 
-  _drawLine(ctx, [0, canvas_y], [grid.width, canvas_y]);
+  ctx.moveTo(0, canvasOriginY);
+  ctx.lineTo(grid.width, canvasOriginY);
 
+  ctx.stroke();
   revertCtxStyles();
 }
 
@@ -70,7 +70,6 @@ function _drawMarksNumbers(grid, ctx, marks, styles) {
   const revertCtxStyles = revertablyAssign(ctx, styles);
 
   const [leftmostX, upmostY] = fromCanvasCoords([0, 0]);
-
   const [originX, originY] = toCanvasCoords([0, 0]);
 
   const atY = clamp(14, originY, grid.height - 2);
@@ -133,19 +132,3 @@ export function drawGridLines(ctx) {
     font: '14px Courier New MS',
   });
 }
-
-/*
-
-todo encaosulate the 
-
-  const revertCtxStyles = revertablyAssign(ctx, styles);
-  ...
-  revertCtxStyles();
-
-trick in a function:
-
-  withCtx((ctx) => { 
-    ...
-  }, styles)
-
-*/
