@@ -6,6 +6,8 @@ import store from '../redux/store';
 import { revertablyAssign } from '../utils';
 import { drawGridLines } from './grid-lines';
 
+import ReactDOM from 'react-dom';
+
 function useWatchCanvasDimensions(canvasRef) {
   const dispatch = useDispatch();
 
@@ -49,26 +51,27 @@ function useZoomOnMouseWheel(canvasRef) {
 
 function useDragToScroll(canvasRef) {
   const dispatch = useDispatch();
-  let prevMouse = null;
-
-  const mousedown = (e) => {
-    prevMouse = [e.offsetX, -e.offsetY];
-    canvasRef.current.addEventListener('mousemove', mousemove);
-    canvasRef.current.addEventListener('mouseup', mouseup);
-  };
-
-  const mousemove = (e) => {
-    const mouse = [e.offsetX, -e.offsetY];
-    dispatch(translate(vecSub(mouse, prevMouse)));
-    prevMouse = mouse;
-  };
-
-  const mouseup = () => {
-    canvasRef.current.removeEventListener('mousemove', mousemove);
-    prevMouse = null;
-  };
 
   React.useEffect(() => {
+    let prevMouse = null;
+
+    const mousedown = (e) => {
+      prevMouse = [e.offsetX, -e.offsetY];
+      canvasRef.current.addEventListener('mousemove', mousemove);
+      canvasRef.current.addEventListener('mouseup', mouseup, { once: true });
+    };
+
+    const mousemove = (e) => {
+      const mouse = [e.offsetX, -e.offsetY];
+      dispatch(translate(vecSub(mouse, prevMouse)));
+      prevMouse = mouse;
+    };
+
+    const mouseup = () => {
+      canvasRef.current.removeEventListener('mousemove', mousemove);
+      prevMouse = null;
+    };
+
     canvasRef.current.addEventListener('mousedown', mousedown);
 
     return () => {
@@ -88,6 +91,7 @@ function clearCanvas(ctx) {
 
 function drawChildren(ctx, children) {
   React.Children.forEach(children, ({ type: drawingFn, props }) => {
+    if (drawingFn.rendersItself) return;
     const revertStyles = props.style && revertablyAssign(ctx, props.style);
     drawingFn(props, ctx);
     revertStyles?.();
@@ -123,5 +127,15 @@ export default ({ children }) => {
   const ctx = useCtx(canvasRef);
   useAllDrawings(ctx, children);
 
-  return <canvas ref={canvasRef} />;
+  return (
+    <div style={{ position: 'relative', overflow: 'hidden' }}>
+      <canvas ref={canvasRef} id="canvas" />
+      {/* 
+        I wish those could be children of the canvas, but when they are, they're not shown. 
+        Canvas' child elements are meant as a fall back for when the 
+        browser doesn't support the <canvas> tag 
+      */}
+      {ctx && children.filter((child) => child.type.rendersItself)}
+    </div>
+  );
 };

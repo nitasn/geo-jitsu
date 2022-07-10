@@ -1,37 +1,20 @@
 import React from 'react';
 import Canvas from './canvas/Canvas';
-import { LineSegment } from './canvas/drawables';
-import { circle, lineSegment, mathFunction, point } from './canvas/drawing-fns';
+import { Circle, LineSegment, MathFunction } from './canvas/drawables';
+import Point from './canvas/Point';
 
 export default () => {
   return (
     <>
       <Canvas>
-        <LineSegment from={[1, -1]} to={[2, -1]} style={{ strokeStyle: 'green' }} />
+        <LineSegment from={[1, -1]} to={[2, -1]} style={{ strokeStyle: 'yellow' }} />
+
+        <MathFunction func={Math.sin} style={{ strokeStyle: 'green' }} />
+
+        <Circle center={[0, 0]} radius={Math.SQRT2} style={{ strokeStyle: 'darkblue' }} />
+
+        <Point location={[3, 1]} label="A" />
       </Canvas>
     </>
   );
 };
-
-function Point({ location, label }) {
-  const [canvasX, canvasY] = toCanvasCoords(location);
-
-  return (
-    <div
-      id="point"
-      style={{
-        width: 5,
-        height: 5,
-        backgroundColor: 'yellow',
-        border: '1px solid black',
-        borderRadius: '100%',
-        position: 'absolute',
-        left: 40 || canvasX,
-        top: 40 || canvasY,
-        transform: 'translate(-50%, -50%)',
-      }}
-    >
-      <p style={{ position: 'absolute', left: 6 }}>{label}</p>
-    </div>
-  );
-}
