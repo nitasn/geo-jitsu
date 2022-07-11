@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import store from '../redux/store';
+import store from '../../redux/store';
 import {
   fromCanvasCoords,
   fromCanvasCoordX,
@@ -9,46 +9,24 @@ import {
   toCanvasCoordX,
   toCanvasCoordY,
   toCanvasDistance,
-} from './conversions';
+} from '../conversions';
 
-function Msg_HasToBeCanvasChild() {
-  // get the name of the function who called us, using js trickery
-  const compName = new Error().stack.match(/at (\S+)/g)[1].slice(3);
-
-  console.warn(
-    `"${compName}" has to be a Canvas child. Usage: \n` +
-      `<Canvas> <${compName} {...props}/> </Canvas>`
-  );
-
-  return (
-    <div
-      style={{
-        color: 'maroon',
-        backgroundColor: '#ccc',
-        paddingInline: 20,
-        paddingBlock: 10,
-        borderRadius: 4,
-        width: 'fit-content',
-        lineHeight: '3ex',
-        margin: 25,
-        boxShadow: '5px 5px 15px -3px rgba(0,0,0,0.36), inset 0 0 2px rgba(255,0,0,0.36)',
-      }}
-    >
-      {compName} has to be a Canvas child. Usage:
-      <pre>{`<Canvas> <${compName} {...props}/> </Canvas>`}</pre>
-    </div>
-  );
-}
+import Msg_HasToBeCanvasChild from './drawable-err-msg';
 
 /**
- * @param {{ from: [number, number], to: [number, number] }}
+ * @param {{ from: string | [number, number], to: string | [number, number], style?: object|undefined }}
  */
-export function LineSegment({ from, to }, ctx) {
+export function LineSegment({ from, to }, ctx, objects) {
   if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
 
   if (typeof from === 'string') {
-    // todo
+    from = objects[from];
   }
+  if (typeof to === 'string') {
+    to = objects[to];
+  }
+
+  if (!from || !to) return console.warn('LineSegment draw failed: no from or to');
 
   ctx.beginPath();
   ctx.moveTo(...toCanvasCoords(from));
@@ -57,7 +35,7 @@ export function LineSegment({ from, to }, ctx) {
 }
 
 /**
- * @param {{ func: (x: Number) => Number }}
+ * @param {{ func: (x: Number) => Number, style?: object|undefined }}
  */
 export function MathFunction({ func }, ctx) {
   if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();

@@ -1,6 +1,7 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
-import { fromCanvasCoords, toCanvasCoords } from './conversions';
+import { useDispatch, useSelector } from 'react-redux';
+import { set } from '../../redux/objects';
+import { fromCanvasCoords, toCanvasCoords } from '../conversions';
 
 export default function Point({ location, label }) {
   useSelector((state) => state.grid);
@@ -8,9 +9,17 @@ export default function Point({ location, label }) {
   const whereInTheWorld = React.useRef(location);
   const [left, top] = toCanvasCoords(whereInTheWorld.current);
 
+  const dispatch = useDispatch();
+
+  React.useEffect(() => {
+    dispatch(set({ key: label, value: whereInTheWorld.current }));
+  }, []);
+
   const ref = React.useRef();
-  useDragAroundWithMouse(ref, function onDragEnd(canvCoords) {
-    whereInTheWorld.current = fromCanvasCoords(canvCoords);
+
+  useDragAroundOnCanvas(ref, {
+    onMouseMove: (pos) => dispatch(set({ key: label, value: fromCanvasCoords(pos) })),
+    onMouseUp: (pos) => (whereInTheWorld.current = fromCanvasCoords(pos)),
   });
 
   const diameter = 7;
@@ -28,6 +37,7 @@ export default function Point({ location, label }) {
         top,
         transform: 'translate(-50%, -50%)',
         cursor: 'pointer',
+        userSelect: 'none',
       }}
     >
       <p style={{ position: 'absolute', left: 10, fontSize: 14, color: '#777' }}>
@@ -39,7 +49,7 @@ export default function Point({ location, label }) {
 
 Point.rendersItself = true;
 
-function useDragAroundWithMouse(ref, onDragEnd) {
+function useDragAroundOnCanvas(ref, { onMouseMove, onMouseUp }) {
   React.useEffect(() => {
     let moving = false;
 
@@ -58,12 +68,13 @@ function useDragAroundWithMouse(ref, onDragEnd) {
       const [x, y] = whereInCanvCoords(e);
       ref.current.style.left = `${x}px`;
       ref.current.style.top = `${y}px`;
+      onMouseMove?.(whereInCanvCoords(e));
     };
 
     const mouseup = (e) => {
       document.removeEventListener('mousemove', mousemove);
       moving = false;
-      onDragEnd?.(whereInCanvCoords(e));
+      onMouseUp?.(whereInCanvCoords(e));
     };
 
     ref.current.addEventListener('mousedown', mousedown);

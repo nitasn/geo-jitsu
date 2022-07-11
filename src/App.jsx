@@ -1,7 +1,7 @@
 import React from 'react';
 import Canvas from './canvas/Canvas';
-import { Circle, LineSegment, MathFunction } from './canvas/drawables';
-import Point from './canvas/Point';
+import { Circle, LineSegment, MathFunction } from './canvas/objects/drawables';
+import Point from './canvas/objects/Point';
 
 export default () => {
   return (

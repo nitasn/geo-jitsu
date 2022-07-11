@@ -6,8 +6,6 @@ import store from '../redux/store';
 import { revertablyAssign } from '../utils';
 import { drawGridLines } from './grid-lines';
 
-import ReactDOM from 'react-dom';
-
 function useWatchCanvasDimensions(canvasRef) {
   const dispatch = useDispatch();
 
@@ -89,31 +87,38 @@ function clearCanvas(ctx) {
   ctx.clearRect(0, 0, grid.width, grid.height);
 }
 
-function drawChildren(ctx, children) {
+function drawChildren(ctx, children, objects) {
   React.Children.forEach(children, ({ type: drawingFn, props }) => {
     if (drawingFn.rendersItself) return;
     const revertStyles = props.style && revertablyAssign(ctx, props.style);
-    drawingFn(props, ctx);
+    drawingFn(props, ctx, objects);
     revertStyles?.();
   });
 }
 
 function useAllDrawings(ctx, children) {
   const grid = useSelector((state) => state.grid);
+  const objects = useSelector((state) => state.objects);
+
+  const childrenToDraw = React.useMemo(
+    () => children.filter(({ type }) => !type.rendersItself),
+    [children]
+  );
 
   React.useEffect(() => {
-    if (!ctx) return; // for the very first render, before canvasRef.current gets a value
+    if (!ctx || !objects) return; 
+    // for the first render, before canvasRef.current gets a value
 
     function drawAll() {
       clearCanvas(ctx);
       drawGridLines(ctx);
-      drawChildren(ctx, children);
+      drawChildren(ctx, childrenToDraw, objects);
     }
 
     drawAll();
     window.addEventListener('resize', drawAll);
     return () => window.removeEventListener('resize', drawAll);
-  }, [grid, ctx]);
+  }, [grid, ctx, objects]);
 }
 
 export default ({ children }) => {
