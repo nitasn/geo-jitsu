@@ -46,6 +46,10 @@ function Msg_HasToBeCanvasChild() {
 export function LineSegment({ from, to }, ctx) {
   if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
 
+  if (typeof from === 'string') {
+    // todo
+  }
+
   ctx.beginPath();
   ctx.moveTo(...toCanvasCoords(from));
   ctx.lineTo(...toCanvasCoords(to));

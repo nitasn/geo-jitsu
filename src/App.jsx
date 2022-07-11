@@ -14,6 +14,11 @@ export default () => {
         <Circle center={[0, 0]} radius={Math.SQRT2} style={{ strokeStyle: 'darkblue' }} />
 
         <Point location={[3, 1]} label="A" />
+
+        <Point location={[2.5, 0]} label="B" />
+
+        {/* todo there's need to be global state of where the points are */}
+        <LineSegment from="A" to="B" style={{ strokeStyle: 'yellow' }} />
       </Canvas>
     </>
   );

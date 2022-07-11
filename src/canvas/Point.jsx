@@ -13,7 +13,7 @@ export default function Point({ location, label }) {
     whereInTheWorld.current = fromCanvasCoords(canvCoords);
   });
 
-  const diameter = 8;
+  const diameter = 7;
   return (
     <div
       ref={ref}
