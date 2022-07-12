@@ -87,7 +87,15 @@ function clearCanvas(ctx) {
   ctx.clearRect(0, 0, grid.width, grid.height);
 }
 
-function drawChildren(ctx, children, objects) {
+function drawChildren(ctx, children) {
+  const { objects } = store.getState();
+  // we have to ask for the children here, instaed of passing them from useAllDrawings's useEffect...
+  // explanation:
+  // on the Canvas' first render, useAllDrawings is invoked; it then stores the `objects` in its closure,
+  // and schedules its effect for after whole Canvas (especially its react-rendered children - e.g. points) are rendered.
+  // the problem is - when the effect callback is invoked firstly invoked, the `objects` are retrieved from the closure,
+  // but it's still empty, because it was created before the react-rendered children (e.g. points) were mounted.
+
   React.Children.forEach(children, ({ type: drawingFn, props }) => {
     if (drawingFn.isReactElement) return;
     const revertStyles = props.style && revertablyAssign(ctx, props.style);
@@ -101,18 +109,19 @@ function useAllDrawings(ctx, children) {
   const objects = useSelector((state) => state.objects);
 
   const childrenToDraw = React.useMemo(
+    // See objects/README.md
     () => children.filter(({ type }) => !type.isReactElement),
     [children]
   );
 
   React.useEffect(() => {
-    if (!ctx || !objects) return;
+    if (!ctx) return;
     // for the first render, before canvasRef.current gets a value
 
     function drawAll() {
       clearCanvas(ctx);
       drawGridLines(ctx);
-      drawChildren(ctx, childrenToDraw, objects);
+      drawChildren(ctx, childrenToDraw);
     }
 
     drawAll();
@@ -135,7 +144,7 @@ export default ({ children }) => {
   return (
     <div style={{ position: 'relative', overflow: 'hidden' }} className="canvas-wrapper">
       <canvas ref={canvasRef} id="canvas" />
-      {/* comment (1) */}
+      {/* See objects/README.md */}
       {ctx && children.filter((child) => child.type.isReactElement)}
     </div>
   );

@@ -63,8 +63,12 @@ export function MathFunction({ func }, ctx) {
 /**
  * @param {{ center: [number, number], radius: number, style?: object|undefined }}
  */
-export function Circle({ center, radius }, ctx) {
+export function Circle({ center, radius }, ctx, objects) {
   if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
+
+  if (typeof center === 'string') {
+    center = objects[center];
+  }
 
   const centerInCanv = toCanvasCoords(center);
   const radiusInCanv = toCanvasDistance(radius);

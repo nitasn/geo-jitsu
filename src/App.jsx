@@ -11,6 +11,7 @@ export default () => {
 
         <MathFunction func={Math.sin} style={{ strokeStyle: 'green' }} />
 
+        {/* todo try draw it around A or B */}
         <Circle center={[0, 0]} radius={Math.SQRT2} style={{ strokeStyle: 'lightblue' }} />
 
         <Point location={[3, 1]} label="A" />
@@ -24,3 +25,7 @@ export default () => {
     </>
   );
 };
+
+// todo - Point should display a Msg_HasToBeCanvasChild if rendered outside the Canvas
+
+// todo - Point should be given style instead of being always yellow
