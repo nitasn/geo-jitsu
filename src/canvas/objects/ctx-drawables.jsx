@@ -1,5 +1,3 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
 import store from '../../redux/store';
 import {
   fromCanvasCoords,
@@ -26,6 +24,7 @@ export function LineSegment({ from, to }, ctx, objects) {
     to = objects[to];
   }
 
+  // todo tofix bug - on first render it always prints the waning
   if (!from || !to) return console.warn('LineSegment draw failed: no from or to');
 
   ctx.beginPath();

@@ -89,7 +89,7 @@ function clearCanvas(ctx) {
 
 function drawChildren(ctx, children, objects) {
   React.Children.forEach(children, ({ type: drawingFn, props }) => {
-    if (drawingFn.rendersItself) return;
+    if (drawingFn.isReactElement) return;
     const revertStyles = props.style && revertablyAssign(ctx, props.style);
     drawingFn(props, ctx, objects);
     revertStyles?.();
@@ -101,12 +101,12 @@ function useAllDrawings(ctx, children) {
   const objects = useSelector((state) => state.objects);
 
   const childrenToDraw = React.useMemo(
-    () => children.filter(({ type }) => !type.rendersItself),
+    () => children.filter(({ type }) => !type.isReactElement),
     [children]
   );
 
   React.useEffect(() => {
-    if (!ctx || !objects) return; 
+    if (!ctx || !objects) return;
     // for the first render, before canvasRef.current gets a value
 
     function drawAll() {
@@ -133,14 +133,15 @@ export default ({ children }) => {
   useAllDrawings(ctx, children);
 
   return (
-    <div style={{ position: 'relative', overflow: 'hidden' }}>
+    <div style={{ position: 'relative', overflow: 'hidden' }} className="canvas-wrapper">
       <canvas ref={canvasRef} id="canvas" />
-      {/* 
-        I wish those could be children of the canvas, but when they are, they're not shown. 
-        Canvas' child elements are meant as a fall back for when the 
-        browser doesn't support the <canvas> tag 
-      */}
-      {ctx && children.filter((child) => child.type.rendersItself)}
+      {/* comment (1) */}
+      {ctx && children.filter((child) => child.type.isReactElement)}
     </div>
   );
 };
+
+/*
+  (1) I wish those could be children of the canvas, but when they are - they're not shown. 
+  Child elements of canvas are meant as a fallback for when the browser doesn't support the <canvas> tag.
+*/
