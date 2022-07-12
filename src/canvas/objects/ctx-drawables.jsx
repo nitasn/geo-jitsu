@@ -115,3 +115,51 @@ export function Circle({ center, radius, passingThrough }, ctx, objects) {
   ctx.arc(...centerInCanv, radiusInCanv, 0, Math.PI * 2);
   ctx.stroke();
 }
+
+function midPoint([x1, y1], [x2, y2]) {
+  return [(x1 + x2) / 2, (y1 + y2) / 2];
+}
+
+function slope([x1, y1], [x2, y2]) {
+  return (y1 - y2) / (x1 - x2);
+}
+
+export function PerpendicularBisector({ left, right }, ctx, objects) {
+  if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
+
+  const { grid } = store.getState();
+
+  if (typeof left === 'string') {
+    left = objects[left];
+  }
+  if (typeof right === 'string') {
+    right = objects[right];
+  }
+
+  if (!left || !right)
+    return console.warn('LineSegment draw failed: param `left` or `right` is unset');
+
+  const [midX, midY] = midPoint(left, right);
+  const [canvMidX, canvMidY] = toCanvasCoords([midX, midY]);
+
+  if (left[1] == right[1]) {
+    // special case: when the perpendicular bisector is parallel to the y axis
+
+    const isFlipped = left[0] > right[0];
+
+    ctx.beginPath();
+    ctx.moveTo(canvMidX, canvMidY);
+    ctx.lineTo(canvMidX, isFlipped ? grid.height : 0);
+    ctx.stroke();
+    return;
+  }
+
+  const edgeX = left[1] > right[1] ? grid.width : 0;
+  const m = -1 / slope(left, right);
+  const matchingY = m * (fromCanvasCoordX(edgeX) - midX) + midY;
+
+  ctx.beginPath();
+  ctx.moveTo(canvMidX, canvMidY);
+  ctx.lineTo(edgeX, toCanvasCoordY(matchingY));
+  ctx.stroke();
+}
