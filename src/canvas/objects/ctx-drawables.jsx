@@ -24,8 +24,8 @@ export function LineSegment({ from, to }, ctx, objects) {
     to = objects[to];
   }
 
-  // todo tofix bug - on first render it always prints the waning
-  if (!from || !to) return console.warn('LineSegment draw failed: no from or to');
+  if (!from || !to)
+    return console.warn('LineSegment draw failed: param `from` or `to` is unset');
 
   ctx.beginPath();
   ctx.moveTo(...toCanvasCoords(from));

@@ -1,10 +1,10 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { set } from '../../redux/objects';
+import { remove, set } from '../../redux/objects';
 import { fromCanvasCoords, toCanvasCoords } from '../conversions';
 
 export default function Point({ location, label }) {
-  useSelector((state) => state.grid);
+  useSelector((state) => state.grid); // triger rerender when the grid state changes
 
   const whereInTheWorld = React.useRef(location);
   const [left, top] = toCanvasCoords(whereInTheWorld.current);
@@ -13,6 +13,7 @@ export default function Point({ location, label }) {
 
   React.useEffect(() => {
     dispatch(set({ key: label, value: whereInTheWorld.current }));
+    return () => dispatch(remove({ key: label }));
   }, []);
 
   const ref = React.useRef();
