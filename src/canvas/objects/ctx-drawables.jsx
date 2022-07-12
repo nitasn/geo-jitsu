@@ -1,3 +1,4 @@
+import { distance } from '../../math-utils';
 import store from '../../redux/store';
 import {
   fromCanvasCoords,
@@ -12,7 +13,13 @@ import {
 import Msg_HasToBeCanvasChild from './drawable-err-msg';
 
 /**
- * @param {{ from: string | [number, number], to: string | [number, number], style?: object|undefined }}
+ * @param {{
+ *   from: string | [number, number],
+ *   to: string | [number, number],
+ *   style?: object
+ * }}
+ * @param {CanvasRenderingContext2D} ctx passed by an effect of the Canvas
+ * @param {object} objects a slice of the global state, notably - where each labeled point is
  */
 export function LineSegment({ from, to }, ctx, objects) {
   if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
@@ -34,7 +41,11 @@ export function LineSegment({ from, to }, ctx, objects) {
 }
 
 /**
- * @param {{ func: (x: Number) => Number, style?: object|undefined }}
+ * @param {{
+ *   func: (x: Number) => Number
+ *   style?: object
+ * }}
+ * @param {CanvasRenderingContext2D} ctx passed by an effect of the Canvas
  */
 export function MathFunction({ func }, ctx) {
   if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
@@ -61,13 +72,40 @@ export function MathFunction({ func }, ctx) {
 }
 
 /**
- * @param {{ center: [number, number], radius: number, style?: object|undefined }}
+ * @param {{
+ *   center: [number, number],
+ *   radius?: number,
+ *   passingThrough?: string | [number, number]
+ *   style?: object
+ * }}
+ * @param {CanvasRenderingContext2D} ctx passed by an effect of the Canvas
+ * @param {object} objects a slice of the global state, notably - where each labeled point is
  */
-export function Circle({ center, radius }, ctx, objects) {
+export function Circle({ center, radius, passingThrough }, ctx, objects) {
   if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
+
+  if (passingThrough != undefined && radius != undefined) {
+    return console.error(
+      'Circle must be given either a `passingThrough` or a `radius` prop'
+    );
+  }
 
   if (typeof center === 'string') {
     center = objects[center];
+  }
+
+  if (!center) return console.warn('Circle draw failed: param `passingThrough` is unset');
+
+  if (typeof passingThrough === 'string') {
+    passingThrough = objects[passingThrough];
+
+    if (!passingThrough)
+      return console.warn('Circle draw failed: param `passingThrough` is unset');
+  }
+
+  if (passingThrough) {
+    // by now it should be a [number, number] tuple in world coords
+    radius = distance(center, passingThrough);
   }
 
   const centerInCanv = toCanvasCoords(center);

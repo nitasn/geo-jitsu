@@ -11,16 +11,19 @@ export default () => {
 
         <MathFunction func={Math.sin} style={{ strokeStyle: 'green' }} />
 
-        {/* todo try draw it around A or B */}
-        <Circle center={[0, 0]} radius={Math.SQRT2} style={{ strokeStyle: 'lightblue' }} />
+        <Circle center="A" radius={1} style={{ strokeStyle: 'lightblue' }} />
 
-        <Point location={[3, 1]} label="A" />
-        <Point location={[2.5, 0]} label="B" />
+        {/* <Circle center={[0, 1]} passingThrough="B" style={{ strokeStyle: 'lightblue' }} /> */}
+
+        <Point location={[-Math.PI / 2, 0]} label="A" />
+        <Point location={[-0.5, 1.5]} label="B" />
         <Point location={[3, -1]} label="C" />
 
         <LineSegment from="A" to="B" style={{ strokeStyle: 'yellow' }} />
         <LineSegment from="B" to="C" style={{ strokeStyle: 'yellow' }} />
         <LineSegment from="C" to="A" style={{ strokeStyle: 'yellow' }} />
+
+        {/* todo bug - when no children other than a MathFun, it crashes */}
       </Canvas>
     </>
   );

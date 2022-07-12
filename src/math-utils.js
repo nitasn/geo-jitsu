@@ -11,6 +11,10 @@ export function vecDot([x, y], other) {
   return x * other.x + y * other.y;
 }
 
+export function distance([x1, y1], [x2, y2]) {
+  return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
+}
+
 /** round upwards to a multiple of a given number.
  *  ceilToNextMultiple(42.5, 15) === 45
  *  ceilToNextMultiple(10, 5) === 10
@@ -29,5 +33,5 @@ export function RoundToDecPlaces(num, decimal_places = 0) {
 }
 
 export function clamp(min, value, max) {
-  return Math.max(min, Math.min(value, max))
+  return Math.max(min, Math.min(value, max));
 }
