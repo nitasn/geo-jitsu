@@ -10,8 +10,6 @@ export default function Point({ location, label }) {
 
   // useMoveSelfAccordingToObjectsState(whereInTheWorld, label);
 
-  console.log('point', label, 'render!');
-
   const [left, top] = toCanvasCoords(whereInTheWorld.current);
 
   const dispatch = useDispatch();

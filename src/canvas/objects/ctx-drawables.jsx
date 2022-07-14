@@ -1,4 +1,11 @@
-import { distance } from '../../math-utils';
+import {
+  distance,
+  vecAbs,
+  vecAdd,
+  vecDot,
+  vecNormalized,
+  vecSub,
+} from '../../math-utils';
 import store from '../../redux/store';
 import {
   fromCanvasCoords,
@@ -127,8 +134,6 @@ function slope([x1, y1], [x2, y2]) {
 export function PerpendicularBisector({ left, right }, ctx, objects) {
   if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
 
-  const { grid } = store.getState();
-
   if (typeof left === 'string') {
     left = objects[left];
   }
@@ -139,27 +144,72 @@ export function PerpendicularBisector({ left, right }, ctx, objects) {
   if (!left || !right)
     return console.warn('LineSegment draw failed: param `left` or `right` is unset');
 
-  const [midX, midY] = midPoint(left, right);
-  const [canvMidX, canvMidY] = toCanvasCoords([midX, midY]);
+  const [vx, vy] = vecSub(right, left);
+  const u = [-vy, vx]; // 90° anticlosckwise rotation
 
-  if (left[1] == right[1]) {
-    // special case: when the perpendicular bisector is parallel to the y axis
+  const mid = midPoint(left, right);
+  const to = vecAdd(mid, u);
 
-    const isFlipped = left[0] > right[0];
+  return _wholeScreenStretchingLineSegment({ from: mid, to }, ctx);
+}
 
+export function AngleBisector({ left, middle, right }, ctx, objects) {
+  if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
+
+  const { grid } = store.getState();
+
+  if (typeof left === 'string') {
+    left = objects[left];
+  }
+  if (typeof right === 'string') {
+    right = objects[right];
+  }
+  if (typeof middle === 'string') {
+    middle = objects[middle];
+  }
+
+  const [A, B] = [vecSub(left, middle), vecSub(right, middle)];
+
+  const C = vecAdd(
+    vecDot(A, vecAbs(B)),
+    // c = |b| a + |a| b
+    vecDot(B, vecAbs(A))
+  );
+
+  const to = vecAdd(C, middle);
+
+  return _wholeScreenStretchingLineSegment({ from: middle, to }, ctx);
+}
+
+function _wholeScreenStretchingLineSegment({ from, to }, ctx) {
+  const { grid } = store.getState();
+
+  const [canvFromX, canvFromY] = toCanvasCoords(from);
+
+  // special case: parallel to y axis
+  if (from[0] == to[0]) {
+    // todo accomedate for float-error by epsilon of half a pixel
     ctx.beginPath();
-    ctx.moveTo(canvMidX, canvMidY);
-    ctx.lineTo(canvMidX, isFlipped ? grid.height : 0);
+    ctx.moveTo(canvFromX, canvFromY);
+    ctx.lineTo(toCanvasCoordX(to[0]), 0);
+    ctx.moveTo(canvFromX, canvFromY);
+    ctx.lineTo(toCanvasCoordX(to[0]), grid.height);
     ctx.stroke();
     return;
   }
 
-  const edgeX = left[1] > right[1] ? grid.width : 0;
-  const m = -1 / slope(left, right);
-  const matchingY = m * (fromCanvasCoordX(edgeX) - midX) + midY;
-
   ctx.beginPath();
-  ctx.moveTo(canvMidX, canvMidY);
-  ctx.lineTo(edgeX, toCanvasCoordY(matchingY));
+
+  const m = slope(from, to);
+  const [x1, y1] = from;
+
+  for (const edgeX of [grid.width, 0]) {
+    const x = fromCanvasCoordX(edgeX);
+    const y = m * (x - x1) + y1;
+
+    ctx.moveTo(canvFromX, canvFromY);
+    ctx.lineTo(edgeX, toCanvasCoordY(y));
+  }
+
   ctx.stroke();
 }

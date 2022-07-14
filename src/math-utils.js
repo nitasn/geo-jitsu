@@ -15,6 +15,14 @@ export function distance([x1, y1], [x2, y2]) {
   return Math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2);
 }
 
+export function vecNormalized(v) {
+  return vecDot(v, 1 / vecAbs(v))
+}
+
+export function vecAbs([x, y]) {
+  return Math.sqrt(x ** 2 + y ** 2);
+}
+
 /** round upwards to a multiple of a given number.
  *  ceilToNextMultiple(42.5, 15) === 45
  *  ceilToNextMultiple(10, 5) === 10
