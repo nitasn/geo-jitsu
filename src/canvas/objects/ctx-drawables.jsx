@@ -170,12 +170,8 @@ export function AngleBisector({ left, middle, right }, ctx, objects) {
 
   const [A, B] = [vecSub(left, middle), vecSub(right, middle)];
 
-  const C = vecAdd(
-    vecDot(A, vecAbs(B)),
-    // c = |b| a + |a| b
-    vecDot(B, vecAbs(A))
-  );
-
+  // C = A |B| + B |A|
+  const C = vecAdd(vecDot(A, vecAbs(B)), vecDot(B, vecAbs(A)));
   const to = vecAdd(C, middle);
 
   return _wholeScreenStretchingLineSegment({ from: middle, to }, ctx);
