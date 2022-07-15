@@ -6,7 +6,7 @@ const e = React.createElement;
 const objects = {};
 
 export default () => {
-  const [isOpen, setIsOpen] = React.useState(true);
+  const [isOpen, setIsOpen] = React.useState(false);
 
   const onOpenCloseBtnClick = React.useCallback(() => {
     setIsOpen((current) => !current);
