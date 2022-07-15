@@ -14,16 +14,20 @@
 
   border-radius: 0.5rem;
   background-color: hsl(0, 0%, 10%);
-  opacity: 0.7;
+  background-color: rgb(33, 33, 33);
+  /* opacity: 0.7; */
 
   transition: var(--transition);
   user-select: none;
+
+  color: #d1d1d1;
 }
 
 .menu h2 {
   text-transform: capitalize;
   letter-spacing: 0.3ch;
-  margin: 0.5rem;
+  margin-top: 0.5rem;
+  text-align: center;
 }
 
 .menu:not([open]) {
@@ -38,9 +42,9 @@
 
 .hr {
   height: 1px;
-  background-color: white;
+  background-color: currentColor;
   width: 100%;
-  margin-block: calc(var(--margin) * 0.75);
+  margin-block: calc(0.5rem + calc(var(--margin) * 0.75));
 }
 
 .round-btn {
@@ -57,11 +61,16 @@
 
   outline: #777 solid 1px;
   outline-offset: 4px;
+
+  transition: transform 200ms ease-in-out;
 }
 
 .round-btn:active {
   background-color: rgba(255, 255, 255, 0.45);
+}
 
+.round-btn:hover {
+  transform: scale(1.07);
 }
 
 .close-open {
@@ -77,10 +86,61 @@
   transform: rotate(-180deg);
 }
 
+.popup-container {
+  border-radius: inherit;
+}
+
+.popup-select-new-object {
+  transition: all 200ms ease-in-out;
+  transform-origin: center;
+}
+
+.popup-select-new-object:not([open]) {
+  transform: scaleX(90%);
+  opacity: 0;
+
+  /* forward pointer events to the elements behind me */
+  pointer-events: none;
+}
+
+.popup-select-new-object {
+  background-color: hsl(149, 15%, 30%);
+  position: absolute;
+  inset: 0;
+  top: 4.5rem;
+  border-radius: inherit;
+
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  overflow-y: scroll;
+}
+
+.popup-select-new-object h2 {
+  margin-bottom: 0.5rem;
+}
+
+.popup-select-new-object li {
+  list-style: none;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  transition: all 200ms ease-in-out;
+  cursor: pointer;
+}
+
+.popup-select-new-object li:hover {
+  list-style: none;
+  background-color: rgba(255, 255, 255, 0.18);
+}
+
 .add-object {
   position: absolute;
   left: 1rem;
   bottom: 1rem;
-  font-size: 1.1rem;
+  font-size: 1.2rem;
+}
 
+.close-popup {
+  outline: none;
 }
