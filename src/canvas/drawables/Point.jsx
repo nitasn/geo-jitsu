@@ -111,7 +111,7 @@ function useDragAroundOnCanvas(ref, { onMouseMove, onMouseUp }) {
  * other than that, the only entity that sets a point's location,
  * is the point itself (when dragged around by the user).
  *
- * surely it'll be useful when we add points who are dependent on other points (e.g. MidPoint)
+ * surely it'll be useful when we add points that are dependent on other points (e.g. MidPoint)
  */
 function useMoveSelfAccordingToObjectsState(whereInTheWorld, label) {
   const objects = useSelector((state) => state.objects);
@@ -119,4 +119,5 @@ function useMoveSelfAccordingToObjectsState(whereInTheWorld, label) {
   if (x != undefined && y != undefined) {
     whereInTheWorld.current = [x, y];
   }
+  // todo subscribe to state changes without causing a rerender
 }
