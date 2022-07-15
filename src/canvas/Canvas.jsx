@@ -144,13 +144,8 @@ export default ({ children }) => {
   return (
     <div style={{ position: 'relative', overflow: 'hidden' }} className="canvas-wrapper">
       <canvas ref={canvasRef} id="canvas" />
-      {/* See objects/README.md */}
+      {/* See drawables/README.md */}
       {ctx && children.filter((child) => child.type.isReactElement)}
     </div>
   );
 };
-
-/*
-  (1) I wish those could be children of the canvas, but when they are - they're not shown. 
-  Child elements of canvas are meant as a fallback for when the browser doesn't support the <canvas> tag.
-*/
