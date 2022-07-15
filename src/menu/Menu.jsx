@@ -9,8 +9,8 @@ export default () => {
   const [isOpen, setIsOpen] = React.useState(false);
 
   const onOpenCloseBtnClick = React.useCallback(() => {
-    setIsOpen((current) => !current);
-  }, []);
+    setIsOpen((currentValue) => !currentValue);
+  }, [setIsOpen]);
 
   return (
     <div open={isOpen} className="menu">
