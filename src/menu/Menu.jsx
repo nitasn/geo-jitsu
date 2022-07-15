@@ -13,7 +13,7 @@ const possibleObjects = [
 ];
 
 export default () => {
-  const [isOpen, setIsOpen] = React.useState(true);
+  const [isOpen, setIsOpen] = React.useState(false);
   const [popupShown, setPopupShown] = React.useState(false);
 
   const onNewObjectChosen = (nameChosen) => {

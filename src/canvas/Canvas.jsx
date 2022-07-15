@@ -87,16 +87,16 @@ function clearCanvas(ctx) {
   ctx.clearRect(0, 0, grid.width, grid.height);
 }
 
-function drawChildren(ctx, children) {
+function drawChildren(ctx, ctxDrawables) {
   const { objects } = store.getState();
-  // we have to ask for the children here, instaed of passing them from useAllDrawings's useEffect...
+  // we have to ask for the objects here, instaed of passing them from useAllDrawings's useEffect...
   // explanation:
   // on the Canvas' first render, useAllDrawings is invoked; it then stores the `objects` in its closure,
   // and schedules its effect for after whole Canvas (especially its react-rendered children - e.g. points) are rendered.
   // the problem is - when the effect callback is invoked firstly invoked, the `objects` are retrieved from the closure,
   // but it's still empty, because it was created before the react-rendered children (e.g. points) were mounted.
 
-  React.Children.forEach(children, ({ type: drawingFn, props }) => {
+  React.Children.forEach(ctxDrawables, ({ type: drawingFn, props }) => {
     if (drawingFn.isReactElement) return;
     const revertStyles = props.style && revertablyAssign(ctx, props.style);
     drawingFn(props, ctx, objects);
@@ -104,15 +104,9 @@ function drawChildren(ctx, children) {
   });
 }
 
-function useAllDrawings(ctx, children) {
+function useAllDrawings(ctx, ctxDrawables) {
   const grid = useSelector((state) => state.grid);
   const objects = useSelector((state) => state.objects);
-
-  const childrenToDraw = React.useMemo(
-    // See objects/README.md
-    () => children.filter(({ type }) => !type.isReactElement),
-    [children]
-  );
 
   React.useEffect(() => {
     if (!ctx) return;
@@ -121,13 +115,22 @@ function useAllDrawings(ctx, children) {
     function drawAll() {
       clearCanvas(ctx);
       drawGridLines(ctx);
-      drawChildren(ctx, childrenToDraw);
+      drawChildren(ctx, ctxDrawables);
     }
 
     drawAll();
     window.addEventListener('resize', drawAll);
     return () => window.removeEventListener('resize', drawAll);
   }, [grid, ctx, objects]);
+}
+
+function splitToTypes(children) {
+  const reactElements = [];
+  const ctxDrawables = [];
+  React.Children.forEach(children, (child) =>
+    (child.type.isReactElement ? reactElements : ctxDrawables).push(child)
+  );
+  return [reactElements, ctxDrawables];
 }
 
 export default ({ children }) => {
@@ -138,14 +141,17 @@ export default ({ children }) => {
   useZoomOnMouseWheel(canvasRef);
   useDragToScroll(canvasRef);
 
+  // see drawables/README.md
+  const [reactElements, ctxDrawables] = splitToTypes(children);
+
   const ctx = useCtx(canvasRef);
-  useAllDrawings(ctx, children);
+  useAllDrawings(ctx, ctxDrawables);
 
   return (
     <div style={{ position: 'relative', overflow: 'hidden' }} className="canvas-wrapper">
       <canvas ref={canvasRef} id="canvas" />
       {/* See drawables/README.md */}
-      {ctx && children.filter((child) => child.type.isReactElement)}
+      {ctx && reactElements}
     </div>
   );
 };
