@@ -6,14 +6,9 @@ import * as Ionicons from 'react-ionicons';
 import store from '../redux/store';
 import { setParams } from '../redux/drawables';
 
-const possibleObjects = [
-  'Point',
-  'Circle',
-  'Line Segment',
-  'Angle Bisector',
-  'Perpendicular Bisector',
-  'Math Function',
-];
+import * as _drawables from '../canvas/drawables/ctx-drawables'
+const spacesBetweenPascalCaseWords = s => s.replace(/([a-z])([A-Z])/g, '$1 $2');
+const possibleObjects = ['Point', ...Object.keys(_drawables).map(spacesBetweenPascalCaseWords)]
 
 export default () => {
   const [isOpen, setIsOpen] = React.useState(false);
