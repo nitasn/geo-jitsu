@@ -1,7 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import './menu.css';
-import './objects-list.css';
 
 import * as Ionicons from 'react-ionicons';
 import store from '../redux/store';
@@ -18,10 +17,10 @@ const possibleObjects = [
 
 export default () => {
   const [isOpen, setIsOpen] = React.useState(false);
-  const [popupShown, setPopupShown] = React.useState(false);
+  const [isAddOpen, setIsAddOpen] = React.useState(false);
 
   const onNewObjectChosen = (nameChosen) => {
-    setPopupShown(false);
+    setIsAddOpen(false);
     if (!nameChosen) return;
     console.log(nameChosen);
   };
@@ -42,12 +41,12 @@ export default () => {
 
       <ObjectsList />
 
-      <a className="round-btn add-object" onClick={() => setPopupShown(true)}>
+      <a className="round-btn add-object" onClick={() => setIsAddOpen(true)}>
         +
       </a>
 
       <div className="popup-container">
-        <PopUpSelectNewObject popupShown={popupShown} onChosen={onNewObjectChosen} />
+        <PopUpSelectNewObject isAddOpen={isAddOpen} onChosen={onNewObjectChosen} />
       </div>
     </div>
   );
@@ -130,6 +129,7 @@ function ItemEditArea({ label, type, params: originalParams, closeFn }) {
         {Object.entries(tempParams).map(([k, v]) => {
           const id = baseId + k;
           return (
+            // todo can't a 'key' prop apply on fragment?
             <div className="line" key={k}>
               <label htmlFor={id}>{k}</label>
               <input
@@ -186,9 +186,9 @@ function _mapValuesToStrings(obj) {
   return Object.fromEntries(entries);
 }
 
-function PopUpSelectNewObject({ onChosen, popupShown }) {
+function PopUpSelectNewObject({ onChosen, isAddOpen }) {
   return (
-    <ol className="popup-select-new-object" open={popupShown}>
+    <ol className="popup-select-new-object" open={isAddOpen}>
       <div className="head">
         <h2>New Item</h2>
         <a className="round-btn close-popup" onClick={() => onChosen(null)}>
@@ -229,3 +229,10 @@ function _validateAndMapParamsFromStrings(type, params) {
 
   return results;
 }
+
+/**
+ * todo
+ * on any item params change,
+ * it doesn't trigger canvas re-render rn...
+ * until i drag the grid around...
+ */
