@@ -88,29 +88,29 @@ function clearCanvas(ctx) {
 }
 
 function drawChildren(ctx, ctxDrawables) {
-  const { objects } = store.getState();
-  // we have to ask for the objects here, instaed of passing them from useAllDrawings's useEffect...
+  const { points } = store.getState();
+  // we have to ask for the points here, instaed of passing them from useAllDrawings's useEffect...
   // explanation:
-  // on the Canvas' first render, useAllDrawings is invoked; it then stores the `objects` in its closure,
+  // on the Canvas' first render, useAllDrawings is invoked; it then stores the `points` in its closure,
   // and schedules its effect for after whole Canvas (especially its react-rendered children - e.g. points) are rendered.
-  // the problem is - when the effect callback is invoked firstly invoked, the `objects` are retrieved from the closure,
+  // the problem is - when the effect callback is invoked firstly invoked, the `points` are retrieved from the closure,
   // but it's still empty, because it was created before the react-rendered children (e.g. points) were mounted.
 
   React.Children.forEach(ctxDrawables, ({ type: drawingFn, props }) => {
     if (drawingFn.isReactElement) return;
-    const revertStyles = props.style && revertablyAssign(ctx, props.style);
-    drawingFn(props, ctx, objects);
-    revertStyles?.();
+    const originalStrokeStyle = ctx.strokeStyle;
+    ctx.strokeStyle = props.color;
+    drawingFn(props, ctx, points);
+    ctx.strokeStyle = originalStrokeStyle;
   });
 }
 
 function useAllDrawings(ctx, ctxDrawables) {
   const grid = useSelector((state) => state.grid);
-  const objects = useSelector((state) => state.objects);
+  const points = useSelector((state) => state.points);
 
   React.useEffect(() => {
-    if (!ctx) return;
-    // for the first render, before canvasRef.current gets a value
+    if (!ctx) return; // for the first render, before canvasRef.current gets a value
 
     function drawAll() {
       clearCanvas(ctx);
@@ -119,17 +119,18 @@ function useAllDrawings(ctx, ctxDrawables) {
     }
 
     drawAll();
-    window.addEventListener('resize', drawAll);
+    window.addEventListener('resize', drawAll); // todo the event listener doesn't have to be rewired when a point's added...
     return () => window.removeEventListener('resize', drawAll);
-  }, [grid, ctx, objects]);
+  }, [grid, ctx, points]);
 }
 
 function splitToTypes(children) {
   const reactElements = [];
   const ctxDrawables = [];
-  React.Children.forEach(children, (child) =>
-    (child.type.isReactElement ? reactElements : ctxDrawables).push(child)
-  );
+  React.Children.forEach(children, (child) => {
+    const list = child.type.isReactElement ? reactElements : ctxDrawables;
+    list.push(child);
+  });
   return [reactElements, ctxDrawables];
 }
 

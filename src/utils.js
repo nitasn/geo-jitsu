@@ -1,5 +1,5 @@
 export const newId = (() => {
-  let current = 1;
+  let current = 0;
   return () => current++;
 })();
 

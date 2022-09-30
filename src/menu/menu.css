@@ -3,6 +3,8 @@
   --width: 400px;
   --transition: transform 0.5s ease-in-out;
 
+  --shadow: 2px 3px 15px -2px rgba(0, 0, 0, 0.23);
+
   position: absolute;
   top: var(--margin);
   left: var(--margin);
@@ -63,6 +65,7 @@
   outline-offset: 4px;
 
   transition: transform 200ms ease-in-out;
+  box-shadow: var(--shadow);
 }
 
 .round-btn:active {
@@ -114,7 +117,8 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  overflow-y: scroll;
+
+  /* overflow-y: scroll; */
 }
 
 .popup-select-new-object h2 {
@@ -139,6 +143,7 @@
   left: 1rem;
   bottom: 1rem;
   font-size: 1.2rem;
+  margin-inline: 0;
 }
 
 .close-popup {

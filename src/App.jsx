@@ -1,5 +1,9 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import Canvas from './canvas/Canvas';
+import Menu from './menu/Menu';
+
+import Point from './canvas/drawables/Point';
 import {
   AngleBisector,
   Circle,
@@ -7,18 +11,24 @@ import {
   MathFunction,
   PerpendicularBisector,
 } from './canvas/drawables/ctx-drawables';
-import Point from './canvas/drawables/Point';
-import Menu from './menu/Menu';
+
+// todo and point
+// import * as ctxDrawables from './canvas/drawables/ctx-drawables';
 
 export default () => {
+  // const drawables = useSelector((state) => state.drawables);
+
   return (
     <>
       <Canvas>
-        <Point location={[0.5, -1]} label="A" />
-        <Point location={[3, 2]} label="B" />
 
-        <LineSegment from="A" to="B" style={{ strokeStyle: 'yellow' }} />
-        <Circle center='A' radius={1} style={{ strokeStyle: 'lightblue' }} />
+        <Point location={[-Math.PI / 2, 0]} label="A" />
+        <Point location={[0, Math.PI / 2]} label="B" />
+
+        <LineSegment from='A' to='B' color='yellow' />
+
+        <MathFunction func={Math.sin} color="lightblue" />
+        <Circle center="A" color="green" radius={1} />
       </Canvas>
 
       <Menu />
@@ -30,4 +40,8 @@ export default () => {
 
 // todo - Point should be given style instead of being always yellow
 
-// todo - add DependencePoint (e.g. MidPoint); not draggable by user, but labeled, and writes to the global 'objects'
+// todo - add DependencePoint (e.g. MidPoint); not draggable by user, but labeled, and writes to the global 'points'
+
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+

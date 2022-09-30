@@ -3,7 +3,6 @@ import {
   vecAbs,
   vecAdd,
   vecDot,
-  vecNormalized,
   vecSub,
 } from '../../math-utils';
 import store from '../../redux/store';
@@ -26,16 +25,16 @@ import Msg_HasToBeCanvasChild from './drawable-err-msg';
  *   style?: object
  * }}
  * @param {CanvasRenderingContext2D} ctx passed by an effect of the Canvas
- * @param {object} objects a slice of the global state, notably - where each labeled point is
+ * @param {object} points a slice of the global state, notably - where each labeled point is
  */
-export function LineSegment({ from, to }, ctx, objects) {
+export function LineSegment({ from, to }, ctx, points) {
   if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
 
   if (typeof from === 'string') {
-    from = objects[from];
+    from = points[from];
   }
   if (typeof to === 'string') {
-    to = objects[to];
+    to = points[to];
   }
 
   if (!from || !to)
@@ -86,9 +85,9 @@ export function MathFunction({ func }, ctx) {
  *   style?: object
  * }}
  * @param {CanvasRenderingContext2D} ctx passed by an effect of the Canvas
- * @param {object} objects a slice of the global state, notably - where each labeled point is
+ * @param {object} points a slice of the global state, notably - where each labeled point is
  */
-export function Circle({ center, radius, passingThrough }, ctx, objects) {
+export function Circle({ center, radius, passingThrough }, ctx, points) {
   if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
 
   if (passingThrough != undefined && radius != undefined) {
@@ -98,13 +97,13 @@ export function Circle({ center, radius, passingThrough }, ctx, objects) {
   }
 
   if (typeof center === 'string') {
-    center = objects[center];
+    center = points[center];
   }
 
   if (!center) return console.warn('Circle draw failed: param `passingThrough` is unset');
 
   if (typeof passingThrough === 'string') {
-    passingThrough = objects[passingThrough];
+    passingThrough = points[passingThrough];
 
     if (!passingThrough)
       return console.warn('Circle draw failed: param `passingThrough` is unset');
@@ -131,14 +130,14 @@ function slope([x1, y1], [x2, y2]) {
   return (y1 - y2) / (x1 - x2);
 }
 
-export function PerpendicularBisector({ left, right }, ctx, objects) {
+export function PerpendicularBisector({ left, right }, ctx, points) {
   if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
 
   if (typeof left === 'string') {
-    left = objects[left];
+    left = points[left];
   }
   if (typeof right === 'string') {
-    right = objects[right];
+    right = points[right];
   }
 
   if (!left || !right)
@@ -153,19 +152,19 @@ export function PerpendicularBisector({ left, right }, ctx, objects) {
   return _wholeScreenStretchingLineSegment({ from: mid, to }, ctx);
 }
 
-export function AngleBisector({ left, middle, right }, ctx, objects) {
+export function AngleBisector({ left, middle, right }, ctx, points) {
   if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
 
   const { grid } = store.getState();
 
   if (typeof left === 'string') {
-    left = objects[left];
+    left = points[left];
   }
   if (typeof right === 'string') {
-    right = objects[right];
+    right = points[right];
   }
   if (typeof middle === 'string') {
-    middle = objects[middle];
+    middle = points[middle];
   }
 
   const [A, B] = [vecSub(left, middle), vecSub(right, middle)];

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { remove, set } from '../../redux/objects';
+import { delPoint, setPoint } from '../../redux/points';
 import { fromCanvasCoords, toCanvasCoords } from '../conversions';
 
 export default function Point({ location, label }) {
@@ -8,21 +8,21 @@ export default function Point({ location, label }) {
 
   const whereInTheWorld = React.useRef(location);
 
-  // useMoveSelfAccordingToObjectsState(whereInTheWorld, label);
+  // useMoveSelfAccordingToPointsState(whereInTheWorld, label);
 
   const [left, top] = toCanvasCoords(whereInTheWorld.current);
 
   const dispatch = useDispatch();
 
   React.useEffect(() => {
-    dispatch(set({ key: label, value: whereInTheWorld.current }));
-    return () => dispatch(remove({ key: label }));
+    dispatch(setPoint({ label, coords: whereInTheWorld.current }));
+    return () => dispatch(delPoint({ label }));
   }, []);
 
   const ref = React.useRef();
 
   useDragAroundOnCanvas(ref, {
-    onMouseMove: (pos) => dispatch(set({ key: label, value: fromCanvasCoords(pos) })),
+    onMouseMove: (pos) => dispatch(setPoint({ label, coords: fromCanvasCoords(pos) })),
     onMouseUp: (pos) => (whereInTheWorld.current = fromCanvasCoords(pos)),
   });
 
@@ -113,9 +113,9 @@ function useDragAroundOnCanvas(ref, { onMouseMove, onMouseUp }) {
  *
  * surely it'll be useful when we add points that are dependent on other points (e.g. MidPoint)
  */
-function useMoveSelfAccordingToObjectsState(whereInTheWorld, label) {
-  const objects = useSelector((state) => state.objects);
-  const [x, y] = objects[label] ?? [];
+function useMoveSelfAccordingToPointsState(whereInTheWorld, label) {
+  const points = useSelector((state) => state.points);
+  const [x, y] = points[label] ?? [];
   if (x != undefined && y != undefined) {
     whereInTheWorld.current = [x, y];
   }
