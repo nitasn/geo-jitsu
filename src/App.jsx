@@ -12,25 +12,11 @@ import {
   PerpendicularBisector,
 } from './canvas/drawables/ctx-drawables';
 
-// todo and point
-// import * as ctxDrawables from './canvas/drawables/ctx-drawables';
 
 export default () => {
-  // const drawables = useSelector((state) => state.drawables);
-
   return (
     <>
-      <Canvas>
-
-        <Point location={[-Math.PI / 2, 0]} label="A" />
-        <Point location={[0, Math.PI / 2]} label="B" />
-
-        <LineSegment from='A' to='B' color='yellow' />
-
-        <MathFunction func={Math.sin} color="lightblue" />
-        <Circle center="A" color="green" radius={1} />
-      </Canvas>
-
+      <Canvas/>
       <Menu />
     </>
   );
@@ -45,3 +31,14 @@ export default () => {
 ////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
 
+const oldShowOff = () => (
+  <>
+    <Point location={[-Math.PI / 2, 0]} label="A" />
+    <Point location={[0, Math.PI / 2]} label="B" />
+
+    <LineSegment from='A' to='B' color='yellow' />
+
+    <MathFunction func={Math.sin} color="lightblue" />
+    <Circle center="A" color="green" radius={1} />
+  </>
+)

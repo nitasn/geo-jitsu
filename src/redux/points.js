@@ -2,7 +2,9 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const slice = createSlice({
   name: 'points',
-  initialState: {},
+  initialState: {
+    // label: world-coords
+  },
 
   reducers: {
     setPoint: (state, { payload: { label, coords } }) => {
