@@ -6,10 +6,10 @@ const slice = createSlice({
     ln1: {
       type: 'LineSegment',
       params: {
-        from: [1, 2],
-        to: [1.5, -1],
+        from: 'A',
+        to: 'B',
       },
-      color: 'green',
+      color: 'yellow',
     },
     ln2: {
       type: 'LineSegment',
@@ -17,7 +17,7 @@ const slice = createSlice({
         from: [-1, -2],
         to: [-1.5, 1],
       },
-      color: 'yellow',
+      color: 'white',
     },
   },
 

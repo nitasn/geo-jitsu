@@ -4,6 +4,8 @@ const slice = createSlice({
   name: 'points',
   initialState: {
     // label: world-coords
+    A: [2, 3],
+    B: [1, -4],
   },
 
   reducers: {

@@ -3,8 +3,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { vecSub } from '../math-utils';
 import { setDimensions, translate, zoomIn, zoomOut } from '../redux/grid';
 import store from '../redux/store';
-import { revertablyAssign } from '../utils';
 import { drawGridLines } from './grid-lines';
+import Point from './drawables/Point';
+
+import * as drawableFns from './drawables/ctx-drawables';
 
 function useWatchCanvasDimensions(canvasRef) {
   const dispatch = useDispatch();
@@ -87,8 +89,8 @@ function clearCanvas(ctx) {
   ctx.clearRect(0, 0, grid.width, grid.height);
 }
 
-function drawChildren(ctx, ctxDrawables) {
-  const { points } = store.getState();
+function drawDrawables(ctx) {
+  const { points, drawables } = store.getState();
   // we have to ask for the points here, instaed of passing them from useAllDrawings's useEffect...
   // explanation:
   // on the Canvas' first render, useAllDrawings is invoked; it then stores the `points` in its closure,
@@ -96,18 +98,16 @@ function drawChildren(ctx, ctxDrawables) {
   // the problem is - when the effect callback is invoked firstly invoked, the `points` are retrieved from the closure,
   // but it's still empty, because it was created before the react-rendered children (e.g. points) were mounted.
 
-  React.Children.forEach(ctxDrawables, ({ type: drawingFn, props }) => {
-    if (drawingFn.isReactElement) return;
+  Object.values(drawables).forEach(({ type, params, color }) => {
     const originalStrokeStyle = ctx.strokeStyle;
-    ctx.strokeStyle = props.color;
-    drawingFn(props, ctx, points);
+    ctx.strokeStyle = color;
+    drawableFns[type](params, ctx, points);
     ctx.strokeStyle = originalStrokeStyle;
   });
 }
 
-function useAllDrawings(ctx, ctxDrawables) {
+function useAllDrawings(ctx, points) {
   const grid = useSelector((state) => state.grid);
-  const points = useSelector((state) => state.points);
 
   React.useEffect(() => {
     if (!ctx) return; // for the first render, before canvasRef.current gets a value
@@ -115,23 +115,13 @@ function useAllDrawings(ctx, ctxDrawables) {
     function drawAll() {
       clearCanvas(ctx);
       drawGridLines(ctx);
-      drawChildren(ctx, ctxDrawables);
+      drawDrawables(ctx);
     }
 
     drawAll();
-    window.addEventListener('resize', drawAll); // todo the event listener doesn't have to be rewired when a point's added...
+    window.addEventListener('resize', drawAll); // todo the event listener doesn't have to be rewired when the grid moves...
     return () => window.removeEventListener('resize', drawAll);
   }, [grid, ctx, points]);
-}
-
-function splitToTypes(children) {
-  const reactElements = [];
-  const ctxDrawables = [];
-  React.Children.forEach(children, (child) => {
-    const list = child.type.isReactElement ? reactElements : ctxDrawables;
-    list.push(child);
-  });
-  return [reactElements, ctxDrawables];
 }
 
 export default ({ children }) => {
@@ -142,17 +132,29 @@ export default ({ children }) => {
   useZoomOnMouseWheel(canvasRef);
   useDragToScroll(canvasRef);
 
-  // see drawables/README.md
-  const [reactElements, ctxDrawables] = splitToTypes(children);
-
   const ctx = useCtx(canvasRef);
-  useAllDrawings(ctx, ctxDrawables);
+  const points = useSelector((state) => state.points);
+  useAllDrawings(ctx, points);
+
+  const pointsElements = React.useMemo(() => {
+    return Object.entries(points).map(([label, location]) => (
+      <Point {...{ label, location }} key={label} />
+    ));
+  }, [points]);
 
   return (
     <div style={{ position: 'relative', overflow: 'hidden' }} className="canvas-wrapper">
       <canvas ref={canvasRef} id="canvas" />
-      {/* See drawables/README.md */}
-      {ctx && reactElements}
+      {/* the 'ctx &&' is exaplained below (1) */}
+      {ctx && pointsElements}
     </div>
   );
 };
+
+
+/**
+ * (1) why 'ctx &&'
+ * points needs the width/height properties from 'grid' slice to calculate their own position.
+ * however, this slice will only contain valid informaion after canvas' effects run for the first time.
+ * at the 1st render, the 'ctx' variable is undefined, because the ref hasn't linked yet; hence the hack.
+ */

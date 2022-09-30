@@ -16,7 +16,8 @@ import {
   toCanvasDistance,
 } from '../conversions';
 
-import Msg_HasToBeCanvasChild from './drawable-err-msg';
+// todo dry the "if (typeof to === 'string') to = points[to];" thing out
+//  and also why am i passing the points global state all over the place?
 
 /**
  * @param {{
@@ -28,8 +29,6 @@ import Msg_HasToBeCanvasChild from './drawable-err-msg';
  * @param {object} points a slice of the global state, notably - where each labeled point is
  */
 export function LineSegment({ from, to }, ctx, points) {
-  if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
-
   if (typeof from === 'string') {
     from = points[from];
   }
@@ -54,8 +53,6 @@ export function LineSegment({ from, to }, ctx, points) {
  * @param {CanvasRenderingContext2D} ctx passed by an effect of the Canvas
  */
 export function MathFunction({ func }, ctx) {
-  if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
-
   const { grid } = store.getState();
 
   const DELTA_X_PIXELS = 5;
@@ -88,8 +85,6 @@ export function MathFunction({ func }, ctx) {
  * @param {object} points a slice of the global state, notably - where each labeled point is
  */
 export function Circle({ center, radius, passingThrough }, ctx, points) {
-  if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
-
   if (passingThrough != undefined && radius != undefined) {
     return console.error(
       'Circle must be given either a `passingThrough` or a `radius` prop'
@@ -131,8 +126,6 @@ function slope([x1, y1], [x2, y2]) {
 }
 
 export function PerpendicularBisector({ left, right }, ctx, points) {
-  if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
-
   if (typeof left === 'string') {
     left = points[left];
   }
@@ -153,8 +146,6 @@ export function PerpendicularBisector({ left, right }, ctx, points) {
 }
 
 export function AngleBisector({ left, middle, right }, ctx, points) {
-  if (!(ctx instanceof CanvasRenderingContext2D)) return Msg_HasToBeCanvasChild();
-
   const { grid } = store.getState();
 
   if (typeof left === 'string') {
