@@ -17,9 +17,7 @@ export const MenuDiv = styled.div`
   z-index: 1;
 
   border-radius: 0.5rem;
-  background-color: hsl(0, 0%, 10%);
-  background-color: rgb(33, 33, 33);
-  /* opacity: 0.7; */
+  background-color: rgb(33 33 33 / .85);
 
   transition: var(--transition);
   user-select: none;

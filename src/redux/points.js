@@ -5,7 +5,7 @@ const slice = createSlice({
   initialState: {
     // label: world-coords
     A: [2, 3],
-    B: [1, -4],
+    B: [1, -1],
   },
 
   reducers: {
