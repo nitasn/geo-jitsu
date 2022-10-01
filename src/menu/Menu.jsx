@@ -1,14 +1,36 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import './menu.css';
-
 import * as Ionicons from 'react-ionicons';
 import store from '../redux/store';
 import { setParams } from '../redux/drawables';
 
-import * as _drawables from '../canvas/drawables/ctx-drawables'
-const spacesBetweenPascalCaseWords = s => s.replace(/([a-z])([A-Z])/g, '$1 $2');
-const possibleObjects = ['Point', ...Object.keys(_drawables).map(spacesBetweenPascalCaseWords)]
+import {
+  MenuDiv,
+  MenuHeader,
+  Head,
+  Hr,
+  AddObjBtn,
+  PopupContainer,
+  ObjectsListDiv,
+  ObjectListItem,
+  ListItemHead,
+  Texts,
+  Type,
+  Desc,
+  EditListItem,
+  EditAreaGrid,
+  EditAreaLabel,
+  EditAreaInput,
+  CancelUpdateDeleteDiv,
+  IconBtn,
+  PopupSelectNewObject,
+  NewItemHeader,
+  ClosePopupBtn,
+  PossibleObjectLi,
+  SlidingButton,
+} from './style';
+
+import possibleObjects from './possibleObjects';
 
 export default () => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -21,29 +43,22 @@ export default () => {
   };
 
   return (
-    <div open={isOpen} className="menu">
-      <div className="head">
-        <h2>Items</h2>
-        <a
-          className="round-btn close-open"
-          onClick={() => setIsOpen((currentValue) => !currentValue)}
-        >
-          ⟩
-        </a>
-      </div>
+    <MenuDiv open={isOpen}>
+      <Head>
+        <MenuHeader>Items</MenuHeader>
+        <SlidingButton open={isOpen} onClick={() => setIsOpen(!isOpen)} children="⟩" />
+      </Head>
 
-      <div className="hr" />
+      <Hr />
 
       <ObjectsList />
 
-      <a className="round-btn add-object" onClick={() => setIsAddOpen(true)}>
-        +
-      </a>
+      <AddObjBtn onClick={() => setIsAddOpen(true)}>+</AddObjBtn>
 
-      <div className="popup-container">
+      <PopupContainer>
         <PopUpSelectNewObject isAddOpen={isAddOpen} onChosen={onNewObjectChosen} />
-      </div>
-    </div>
+      </PopupContainer>
+    </MenuDiv>
   );
 };
 
@@ -51,12 +66,12 @@ function ObjectsList() {
   const drawables = useSelector((state) => state.drawables);
 
   return (
-    <div className="objects-list">
+    <ObjectsListDiv>
       {Object.entries(drawables).map(([label, obj]) => (
         // 'obj' contains { type, params, color }
         <ObjectsListItem label={label} {...obj} key={label} />
       ))}
-    </div>
+    </ObjectsListDiv>
   );
 }
 
@@ -64,30 +79,25 @@ function ObjectsListItem({ label, type, params, color }) {
   const [beingEdited, setBeingEdited] = React.useState(false);
 
   return (
-    <div open={beingEdited} className="object-list-item">
-      <div className="head">
-        <div className="texts">
-          <span className="type">{type}</span>
-          <span className="label" style={{ color }}>
-            {label}
-          </span>
-          {!beingEdited && (
-            <span className="desc">{oneLineDescription(type, params)}</span>
-          )}
-        </div>
+    /** todo why isn't it called beingEdited?? */
+    <ObjectListItem>
+      <ListItemHead open={beingEdited}>
+        <Texts>
+          <Type>{type}</Type>
+          <span style={{ color }}>{label}</span>
+          {!beingEdited && <Desc>{oneLineDescription(type, params)}</Desc>}
+        </Texts>
         {!beingEdited && (
-          <a className="round-btn edit-list-item" onClick={() => setBeingEdited(true)}>
-            ✐
-          </a>
+          <EditListItem onClick={() => setBeingEdited(true)}>✐</EditListItem>
         )}
-      </div>
+      </ListItemHead>
       {beingEdited && (
         <ItemEditArea
           {...{ label, type, params }}
           closeFn={() => setBeingEdited(false)}
         />
       )}
-    </div>
+    </ObjectListItem>
   );
 }
 
@@ -120,23 +130,24 @@ function ItemEditArea({ label, type, params: originalParams, closeFn }) {
 
   return (
     <>
-      <form className="edit-area">
-        {Object.entries(tempParams).map(([k, v]) => {
-          const id = baseId + k;
-          return (
-            // todo can't a 'key' prop apply on fragment?
-            <div className="line" key={k}>
-              <label htmlFor={id}>{k}</label>
-              <input
-                type="text"
-                id={id}
-                value={v}
-                onChange={(e) => onAnyInputChange(k, e.target.value)}
-              />
-            </div>
-          );
+      <EditAreaGrid>
+        {Object.entries(tempParams).flatMap(([key, value]) => {
+          const id = `${baseId}-${key}`;
+          // we're using id's indead of putting the input inside the label,
+          // so that we can use a grid layout (each row has a label and an input)
+          return [
+            <EditAreaLabel key={`${key}-label`} htmlFor={id}>
+              {key}
+            </EditAreaLabel>,
+            <EditAreaInput
+              id={id}
+              key={`${key}-input`}
+              value={value}
+              onChange={(e) => onAnyInputChange(key, e.target.value)}
+            />,
+          ];
         })}
-      </form>
+      </EditAreaGrid>
 
       <EraseCancelUpdate {...{ onCancelClick, onUpdateClick, onDeleteClick }} />
     </>
@@ -157,19 +168,19 @@ function oneLineDescription(type, params) {
 
 function EraseCancelUpdate({ onCancelClick, onUpdateClick, onDeleteClick }) {
   return (
-    <div className="erase-cancel-update-container">
-      <a className="cancel" onClick={onCancelClick}>
+    <CancelUpdateDeleteDiv>
+      <IconBtn onClick={onCancelClick} mod="cancel">
         <Ionicons.CloseOutline color="" />
-      </a>
+      </IconBtn>
 
-      <a className="update" onClick={onUpdateClick}>
+      <IconBtn onClick={onUpdateClick} mod="update">
         <Ionicons.CheckmarkOutline color="" />
-      </a>
+      </IconBtn>
 
-      <a className="erase" onClick={onDeleteClick}>
+      <IconBtn onClick={onDeleteClick} mod="delete">
         <Ionicons.TrashOutline color="" />
-      </a>
-    </div>
+      </IconBtn>
+    </CancelUpdateDeleteDiv>
   );
 }
 
@@ -183,21 +194,17 @@ function _mapValuesToStrings(obj) {
 
 function PopUpSelectNewObject({ onChosen, isAddOpen }) {
   return (
-    <ol className="popup-select-new-object" open={isAddOpen}>
-      <div className="head">
-        <h2>New Item</h2>
-        <a className="round-btn close-popup" onClick={() => onChosen(null)}>
-          &times;
-        </a>
-      </div>
-      {possibleObjects.map((name, idx) => {
-        return (
-          <li onClick={() => onChosen(name)} key={idx}>
-            {name}
-          </li>
-        );
-      })}
-    </ol>
+    <PopupSelectNewObject open={isAddOpen}>
+      <Head>
+        <NewItemHeader>New Item</NewItemHeader>
+        <ClosePopupBtn onClick={() => onChosen(null)}>&times;</ClosePopupBtn>
+      </Head>
+      {possibleObjects.map((name, idx) => (
+        <PossibleObjectLi onClick={() => onChosen(name)} key={idx}>
+          {name}
+        </PossibleObjectLi>
+      ))}
+    </PopupSelectNewObject>
   );
 }
 
@@ -217,7 +224,7 @@ function _validateAndMapParamsFromStrings(type, params) {
     if (value in points) continue; // if the value is the name (label) of an existing point
 
     const asNumArr = value.split(',').map((str) => +str.trim());
-    if (asNumArr.length != 2 || isNaN(asNumArr[0]) || isNaN(asNumArr[1])) return null;
+    if (asNumArr.length !== 2 || isNaN(asNumArr[0]) || isNaN(asNumArr[1])) return null;
 
     results[key] = asNumArr;
   }
