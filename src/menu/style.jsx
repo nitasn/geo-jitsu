@@ -97,11 +97,6 @@ export const AddObjBtn = styled(_RoundButton)`
   margin-inline: 0;
 `;
 
-// todo rename them all...
-export const PopupContainer = styled.div`
-  border-radius: inherit;
-`;
-
 export const ObjectsListDiv = styled.div`
   display: flex;
   flex-direction: column;
@@ -209,7 +204,7 @@ export const IconBtn = styled.a`
   --clr-delete: rgba(235, 96, 107, 0.86);
 `;
 
-export const PopupSelectNewObject = styled.ol`
+export const ListNewObj = styled.ol`
   transition: all 200ms ease-in-out;
   transform-origin: center;
 

@@ -3,8 +3,8 @@ import { createSlice } from '@reduxjs/toolkit';
 const slice = createSlice({
   name: 'points',
   initialState: {
-    // label: world-coords
-    A: [2, 3],
+    // label -> world-coords
+    A: [3, 1],
     B: [1, -1],
   },
 
@@ -12,7 +12,7 @@ const slice = createSlice({
     setPoint: (state, { payload: { label, coords } }) => {
       state[label] = coords;
     },
-    delPoint: (state, { payload: { label } }) => {
+    delPoint: (state, { payload: label }) => {
       delete state[label];
     },
   },

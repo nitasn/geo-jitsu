@@ -11,18 +11,17 @@ import * as drawableFns from './drawables/ctx-drawables';
 function useWatchCanvasDimensions(canvasRef) {
   const dispatch = useDispatch();
 
-  const cb = () => {
-    if (!canvasRef.current) throw new Error('canvasRef is empty!');
-    const { clientWidth, clientHeight } = canvasRef.current;
-    canvasRef.current.width = clientWidth; // match screen resolutions
-    canvasRef.current.height = clientHeight; // to canvas resolution
-    dispatch(setDimensions([clientWidth, clientHeight]));
-  };
-
   React.useEffect(() => {
-    cb();
-    window.addEventListener('resize', cb);
-    return () => window.removeEventListener('resize', cb);
+    const dispathDimensions = () => {
+      if (!canvasRef.current) throw new Error('canvasRef is empty!');
+      const { clientWidth, clientHeight } = canvasRef.current;
+      canvasRef.current.width = clientWidth; // match screen resolutions
+      canvasRef.current.height = clientHeight; // to canvas resolution
+      dispatch(setDimensions([clientWidth, clientHeight]));
+    };
+    dispathDimensions();
+    window.addEventListener('resize', dispathDimensions);
+    return () => window.removeEventListener('resize', dispathDimensions);
   }, []);
 }
 
@@ -40,12 +39,12 @@ function useZoomOnMouseWheel(canvasRef) {
   const dispatch = useDispatch();
 
   React.useEffect(() => {
-    const cb = (e) => {
+    const dispatchZoom = (e) => {
       Math.sign(e.deltaY) > 0 ? dispatch(zoomOut()) : dispatch(zoomIn());
       e.preventDefault(); // don't scroll the page
     };
-    canvasRef.current.addEventListener('wheel', cb);
-    return () => canvasRef.current.removeEventListener('wheel', cb);
+    canvasRef.current.addEventListener('wheel', dispatchZoom);
+    return () => canvasRef.current.removeEventListener('wheel', dispatchZoom);
   }, []);
 }
 
@@ -124,7 +123,7 @@ function useAllDrawings(ctx, points) {
   }, [grid, ctx, points]);
 }
 
-export default ({ children }) => {
+export default () => {
   const canvasRef = React.useRef();
 
   useNoRightClickMenu(canvasRef);
@@ -140,7 +139,7 @@ export default ({ children }) => {
     return Object.entries(points).map(([label, location]) => (
       <Point {...{ label, location }} key={label} />
     ));
-  }, [points]);
+  }, [points]); // todo what if we only depend on points.length?
 
   return (
     <div style={{ position: 'relative', overflow: 'hidden' }} className="canvas-wrapper">

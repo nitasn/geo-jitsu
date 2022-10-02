@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as Ionicons from 'react-ionicons';
 import store from '../redux/store';
-import { setParams } from '../redux/drawables';
+import { removeDrawable, setDrawable, setParams } from '../redux/drawables';
 
 import {
   MenuDiv,
@@ -10,7 +10,6 @@ import {
   Head,
   Hr,
   AddObjBtn,
-  PopupContainer,
   ObjectsListDiv,
   ObjectListItem,
   ListItemHead,
@@ -23,7 +22,7 @@ import {
   EditAreaInput,
   CancelUpdateDeleteDiv,
   IconBtn,
-  PopupSelectNewObject,
+  ListNewObj,
   NewItemHeader,
   ClosePopupBtn,
   PossibleObjectLi,
@@ -31,15 +30,27 @@ import {
 } from './style';
 
 import possibleObjects from './possibleObjects';
+import { delPoint, setPoint } from '../redux/points';
 
 export default () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [isAddOpen, setIsAddOpen] = React.useState(false);
+  const dispatch = useDispatch();
 
-  const onNewObjectChosen = (nameChosen) => {
+  const onNewObjectChosen = (name) => {
     setIsAddOpen(false);
-    if (!nameChosen) return;
-    console.log(nameChosen);
+    if (!name) return;
+    if (name == 'Point') {
+      dispatch(setPoint({ label: 'New Point', coords: [0, 0] }));
+    } else {
+      dispatch(
+        setDrawable(name, {
+          type: name.replace(/\s+/g, ''),
+          params: defaultParams(name),
+          color: 'lightblue',
+        })
+      );
+    }
   };
 
   return (
@@ -48,16 +59,12 @@ export default () => {
         <MenuHeader>Items</MenuHeader>
         <SlidingButton open={isOpen} onClick={() => setIsOpen(!isOpen)} children="⟩" />
       </Head>
-
       <Hr />
 
       <ObjectsList />
 
-      <AddObjBtn onClick={() => setIsAddOpen(true)}>+</AddObjBtn>
-
-      <PopupContainer>
-        <PopUpSelectNewObject isAddOpen={isAddOpen} onChosen={onNewObjectChosen} />
-      </PopupContainer>
+      <AddObjBtn onClick={() => setIsAddOpen(true)} children="+" />
+      <MenuNewObj isAddOpen={isAddOpen} onChosen={onNewObjectChosen} />
     </MenuDiv>
   );
 };
@@ -81,21 +88,29 @@ function ObjectsListItem({ label, type, params, color }) {
   return (
     /** todo why isn't it called beingEdited?? */
     <ObjectListItem>
-      <ListItemHead open={beingEdited}>
-        <Texts>
-          <Type>{type}</Type>
-          <span style={{ color }}>{label}</span>
-          {!beingEdited && <Desc>{oneLineDescription(type, params)}</Desc>}
-        </Texts>
-        {!beingEdited && (
+      {beingEdited ? (
+        <>
+          <ListItemHead open>
+            <Texts>
+              <Type>{type}</Type>
+              <span style={{ color }}>{label}</span>
+            </Texts>
+          </ListItemHead>
+
+          <ItemEditArea
+            {...{ label, type, params }}
+            closeFn={() => setBeingEdited(false)}
+          />
+        </>
+      ) : (
+        <ListItemHead>
+          <Texts>
+            <Type>{type}</Type>
+            <span style={{ color }}>{label}</span>
+            <Desc>{oneLineDescription(type, params)}</Desc>
+          </Texts>
           <EditListItem onClick={() => setBeingEdited(true)}>✐</EditListItem>
-        )}
-      </ListItemHead>
-      {beingEdited && (
-        <ItemEditArea
-          {...{ label, type, params }}
-          closeFn={() => setBeingEdited(false)}
-        />
+        </ListItemHead>
       )}
     </ObjectListItem>
   );
@@ -113,8 +128,6 @@ function ItemEditArea({ label, type, params: originalParams, closeFn }) {
     setTempParams({ ...tempParams, [key]: value });
   };
 
-  const onCancelClick = closeFn;
-
   const onUpdateClick = () => {
     const newParams = _validateAndMapParamsFromStrings(type, tempParams);
     if (!newParams) {
@@ -125,7 +138,8 @@ function ItemEditArea({ label, type, params: originalParams, closeFn }) {
   };
 
   const onDeleteClick = () => {
-    console.log('delete');
+    const remove = type == 'Point' ? delPoint : removeDrawable;
+    dispatch(remove(label));
   };
 
   return (
@@ -149,7 +163,7 @@ function ItemEditArea({ label, type, params: originalParams, closeFn }) {
         })}
       </EditAreaGrid>
 
-      <EraseCancelUpdate {...{ onCancelClick, onUpdateClick, onDeleteClick }} />
+      <EraseCancelUpdate onCancelClick={closeFn} {...{ onUpdateClick, onDeleteClick }} />
     </>
   );
 }
@@ -157,13 +171,6 @@ function ItemEditArea({ label, type, params: originalParams, closeFn }) {
 function _prettyPoint(arrOrLabel) {
   if (Array.isArray(arrOrLabel)) return `(${arrOrLabel.join(', ')})`;
   return arrOrLabel;
-}
-
-function oneLineDescription(type, params) {
-  switch (type) {
-    case 'LineSegment':
-      return `${_prettyPoint(params.from)} ${_prettyPoint(params.to)}`;
-  }
 }
 
 function EraseCancelUpdate({ onCancelClick, onUpdateClick, onDeleteClick }) {
@@ -192,21 +199,37 @@ function _mapValuesToStrings(obj) {
   return Object.fromEntries(entries);
 }
 
-function PopUpSelectNewObject({ onChosen, isAddOpen }) {
+function MenuNewObj({ onChosen, isAddOpen }) {
   return (
-    <PopupSelectNewObject open={isAddOpen}>
+    <ListNewObj open={isAddOpen}>
       <Head>
         <NewItemHeader>New Item</NewItemHeader>
-        <ClosePopupBtn onClick={() => onChosen(null)}>&times;</ClosePopupBtn>
+        <ClosePopupBtn onClick={() => onChosen(null)} children="&times;" />
       </Head>
       {possibleObjects.map((name, idx) => (
         <PossibleObjectLi onClick={() => onChosen(name)} key={idx}>
           {name}
         </PossibleObjectLi>
       ))}
-    </PopupSelectNewObject>
+    </ListNewObj>
   );
 }
+
+/**
+ * todo
+ *
+ * 1. on any item params change,
+ *    it doesn't trigger canvas re-render rn...
+ *    until i drag the grid around...
+ *
+ * 2. if a drawable uses invalid values (labels of non-existing points)
+ *    the drawable won't be drawn, and its box in the menu will be clearly mark;
+ *    the wrong label will be red, and on hover a tool tip will explain the problem.
+ */
+
+///////////////////////////////////////////////////////////////////////////////
+///                S P E C I F I C   O B J E C T S   C O D E                ///
+///////////////////////////////////////////////////////////////////////////////
 
 /**
  * upon success, returns a new object (where values like "3, 4." are converted into [3, 4]);
@@ -216,12 +239,12 @@ function PopUpSelectNewObject({ onChosen, isAddOpen }) {
 function _validateAndMapParamsFromStrings(type, params) {
   const { points } = store.getState();
 
-  // todo the type (and keys) should play a role...
+  // todo the type should play a role...
 
   const results = { ...params };
 
   for (const [key, value] of Object.entries(params)) {
-    if (value in points) continue; // if the value is the name (label) of an existing point
+    if (value in points && key != value) continue; // if the value is the label of an existing (different) point
 
     const asNumArr = value.split(',').map((str) => +str.trim());
     if (asNumArr.length !== 2 || isNaN(asNumArr[0]) || isNaN(asNumArr[1])) return null;
@@ -232,9 +255,23 @@ function _validateAndMapParamsFromStrings(type, params) {
   return results;
 }
 
-/**
- * todo
- * on any item params change,
- * it doesn't trigger canvas re-render rn...
- * until i drag the grid around...
+function oneLineDescription(type, params) {
+  return Object.values(params).map(_prettyPoint).join(' ');
+
+  switch (type) {
+    case 'LineSegment':
+      return `${_prettyPoint(params.from)} ${_prettyPoint(params.to)}`;
+  }
+}
+
+/* todo:
+ * replace the default params behaviour with an empty non-cancellable (but deletable) object.
  */
+function defaultParams(type) {
+  switch (type) {
+    case 'LineSegment':
+      return { from: [1, 1], to: [2, 1] };
+    case 'Circle':
+      return { center: [-1, -1], radius: 1 };
+  }
+}

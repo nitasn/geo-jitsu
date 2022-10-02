@@ -28,11 +28,14 @@ const slice = createSlice({
     setColor: (state, { payload: [label, color] }) => {
       state[label].color = color;
     },
-    removeDrawable: (state, { payload: { label } }) => {
+    removeDrawable: (state, { payload: label }) => {
       delete state[label];
+    },
+    setDrawable: (state, { payload: [label, { type, params, color }] }) => {
+      state[label] = { type, params, color };
     },
   },
 });
 
-export const { setParams, setColor, removeDrawable } = slice.actions;
+export const { setParams, setColor, removeDrawable, setDrawable } = slice.actions;
 export default slice.reducer;
