@@ -31,6 +31,7 @@ import {
 
 import possibleObjects from './possibleObjects';
 import { delPoint, setPoint } from '../redux/points';
+import { roundToDecPlaces } from '../math-utils';
 
 export default () => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -41,7 +42,7 @@ export default () => {
     setIsAddOpen(false);
     if (!name) return;
     if (name == 'Point') {
-      dispatch(setPoint({ label: 'New Point', coords: [0, 0] }));
+      dispatch(setPoint(['New Point', [0, 0]]));
     } else {
       dispatch(
         setDrawable(name, {
@@ -71,12 +72,22 @@ export default () => {
 
 function ObjectsList() {
   const drawables = useSelector((state) => state.drawables);
+  const points = useSelector((state) => state.points);
 
   return (
     <ObjectsListDiv>
       {Object.entries(drawables).map(([label, obj]) => (
         // 'obj' contains { type, params, color }
         <ObjectsListItem label={label} {...obj} key={label} />
+      ))}
+      {Object.entries(points).map(([label, coords]) => (
+        <ObjectsListItem
+          label={label}
+          type="Point"
+          params={{ coords }}
+          color="yellow"
+          key={label}
+        />
       ))}
     </ObjectsListDiv>
   );
@@ -133,13 +144,16 @@ function ItemEditArea({ label, type, params: originalParams, closeFn }) {
     if (!newParams) {
       return alert('invalid params.');
     }
-    dispatch(setParams([label, newParams]));
+    dispatch(
+      type === 'Point'
+        ? setPoint([label, newParams.coords])
+        : setParams([label, newParams])
+    );
     closeFn();
   };
 
   const onDeleteClick = () => {
-    const remove = type == 'Point' ? delPoint : removeDrawable;
-    dispatch(remove(label));
+    dispatch((type == 'Point' ? delPoint : removeDrawable)(label));
   };
 
   return (
@@ -168,11 +182,6 @@ function ItemEditArea({ label, type, params: originalParams, closeFn }) {
   );
 }
 
-function _prettyPoint(arrOrLabel) {
-  if (Array.isArray(arrOrLabel)) return `(${arrOrLabel.join(', ')})`;
-  return arrOrLabel;
-}
-
 function EraseCancelUpdate({ onCancelClick, onUpdateClick, onDeleteClick }) {
   return (
     <CancelUpdateDeleteDiv>
@@ -191,9 +200,18 @@ function EraseCancelUpdate({ onCancelClick, onUpdateClick, onDeleteClick }) {
   );
 }
 
+function _prettyPoint(arrOrLabel) {
+  if (Array.isArray(arrOrLabel)) return `(${_arrToCsv(arrOrLabel)})`;
+  return arrOrLabel; // it's a label
+}
+
+function _arrToCsv(values) {
+  return values.map((x) => roundToDecPlaces(x, 3)).join(', ');
+}
+
 function _mapValuesToStrings(obj) {
   const entries = Object.entries(obj).map(([k, v]) => {
-    if (Array.isArray(v)) v = v.join(', ');
+    if (Array.isArray(v)) v = _arrToCsv(v); // else - it's a label
     return [k, v];
   });
   return Object.fromEntries(entries);
@@ -225,6 +243,8 @@ function MenuNewObj({ onChosen, isAddOpen }) {
  * 2. if a drawable uses invalid values (labels of non-existing points)
  *    the drawable won't be drawn, and its box in the menu will be clearly mark;
  *    the wrong label will be red, and on hover a tool tip will explain the problem.
+ *
+ * 3. points should be listed too.
  */
 
 ///////////////////////////////////////////////////////////////////////////////

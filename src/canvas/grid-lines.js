@@ -1,5 +1,5 @@
 import { clamp } from '../math-utils';
-import { ceilToNextMultiple, RoundToDecPlaces } from '../math-utils';
+import { ceilToNextMultiple, roundToDecPlaces } from '../math-utils';
 import { revertablyAssign } from '../utils';
 
 /**
@@ -76,7 +76,7 @@ function _drawMarksNumbers(grid, ctx, marks, styles) {
   let x = toCanvasCoordX(ceilToNextMultiple(leftmostX, marks));
   while (x < grid.width) {
     let value = fromCanvasCoordX(x);
-    value = RoundToDecPlaces(value, 5);
+    value = roundToDecPlaces(value, 5);
     ctx.fillText(value, x, atY);
     x += grid.pixelsPerUnit * marks;
   }
@@ -85,7 +85,7 @@ function _drawMarksNumbers(grid, ctx, marks, styles) {
   let y = toCanvasCoordY(ceilToNextMultiple(upmostY, marks));
   while (y < grid.height) {
     let value = fromCanvasCoordY(y);
-    value = RoundToDecPlaces(value, 5);
+    value = roundToDecPlaces(value, 5);
     ctx.fillText(value, atX, y);
     y += grid.pixelsPerUnit * marks;
   }

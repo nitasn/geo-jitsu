@@ -8,21 +8,21 @@ export default function Point({ location, label }) {
 
   const whereInTheWorld = React.useRef(location);
 
-  // useMoveSelfAccordingToPointsState(whereInTheWorld, label);
+  useMoveSelfAccordingToPointsSlice(whereInTheWorld, label);
 
   const [left, top] = toCanvasCoords(whereInTheWorld.current);
 
   const dispatch = useDispatch();
 
   React.useEffect(() => {
-    dispatch(setPoint({ label, coords: whereInTheWorld.current }));
+    dispatch(setPoint([label, whereInTheWorld.current]));
     return () => dispatch(delPoint({ label }));
   }, []);
 
   const ref = React.useRef();
 
   useDragAroundOnCanvas(ref, {
-    onMouseMove: (pos) => dispatch(setPoint({ label, coords: fromCanvasCoords(pos) })),
+    onMouseMove: (pos) => dispatch(setPoint([label, fromCanvasCoords(pos)])),
     onMouseUp: (pos) => (whereInTheWorld.current = fromCanvasCoords(pos)),
   });
 
@@ -68,10 +68,14 @@ Point.isReactElement = true;
 
 function useDragAroundOnCanvas(ref, { onMouseMove, onMouseUp }) {
   React.useEffect(() => {
-    let moving = false;
+    let isMoving = false;
+
+    // we have to cache this, because the effect returned function gets called
+    // after the ref is cleared...
+    const pointEl = ref.current;
 
     const mousedown = (e) => {
-      moving = true;
+      isMoving = true;
       document.addEventListener('mousemove', mousemove);
       document.addEventListener('mouseup', mouseup, { once: true });
     };
@@ -83,41 +87,32 @@ function useDragAroundOnCanvas(ref, { onMouseMove, onMouseUp }) {
 
     const mousemove = (e) => {
       const [x, y] = whereInCanvCoords(e);
-      ref.current.style.left = `${x}px`;
-      ref.current.style.top = `${y}px`;
+      pointEl.style.left = `${x}px`;
+      pointEl.style.top = `${y}px`;
       onMouseMove?.(whereInCanvCoords(e));
     };
 
     const mouseup = (e) => {
       document.removeEventListener('mousemove', mousemove);
-      moving = false;
+      isMoving = false;
       onMouseUp?.(whereInCanvCoords(e));
     };
 
-    ref.current.addEventListener('mousedown', mousedown);
+    pointEl.addEventListener('mousedown', mousedown);
 
     return () => {
-      ref.current.removeEventListener('mousedown', mousedown);
-      if (moving) {
-        ref.current.removeEventListener('mousemove', mousemove);
-        ref.current.removeEventListener('mouseup', mouseup);
-      }
+      pointEl.removeEventListener('mousedown', mousedown);
+      // won't hurt to call remove on them even if they don't exist:
+      pointEl.removeEventListener('mousemove', mousemove);
+      pointEl.removeEventListener('mouseup', mouseup);
     };
   }, []);
 }
 
-/**
- * this is mainly useful to make redux's time-machine trick work.
- * other than that, the only entity that sets a point's location,
- * is the point itself (when dragged around by the user).
- *
- * surely it'll be useful when we add points that are dependent on other points (e.g. MidPoint)
- */
-function useMoveSelfAccordingToPointsState(whereInTheWorld, label) {
+function useMoveSelfAccordingToPointsSlice(whereInTheWorld, label) {
   const points = useSelector((state) => state.points);
   const [x, y] = points[label] ?? [];
   if (x != undefined && y != undefined) {
     whereInTheWorld.current = [x, y];
   }
-  // todo subscribe to state changes without causing a rerender
 }

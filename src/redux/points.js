@@ -9,7 +9,7 @@ const slice = createSlice({
   },
 
   reducers: {
-    setPoint: (state, { payload: { label, coords } }) => {
+    setPoint: (state, { payload: [ label, coords ] }) => {
       state[label] = coords;
     },
     delPoint: (state, { payload: label }) => {

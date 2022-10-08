@@ -34,7 +34,7 @@ export function ceilToNextMultiple(num, multiplesOf = 1) {
 /**
  * round to the closest multiple of (some power of) ten.
  */
-export function RoundToDecPlaces(num, decimal_places = 0) {
+export function roundToDecPlaces(num, decimal_places = 0) {
   const integer = Math.round((num + Number.EPSILON) * 10 ** decimal_places);
 
   return integer / 10 ** decimal_places;
