@@ -7,28 +7,19 @@ import {
   Texts,
   Type,
   Desc,
-  EditListItem
+  EditListItem,
 } from './style';
 import { ItemEditArea } from './ItemEditArea';
-import { prettyPoint } from "./strRepr";
+import { prettyPoint } from './strRepr';
 
 export function ExistingObjectsList() {
-  const drawables = useSelector((state) => state.drawables);
-  const points = useSelector((state) => state.points);
+  const objects = useSelector((state) => state.objects);
 
   return (
     <ObjectsListDiv>
-      {Object.entries(drawables).map(([label, obj]) => (
-        // 'obj' contains { type, params, color }
-        <ExistingObjectItem label={label} {...obj} key={label} />
-      ))}
-      {Object.entries(points).map(([label, coords]) => (
-        <ExistingObjectItem
-          label={label}
-          type="Point"
-          params={{ coords }}
-          color="yellow"
-          key={label} />
+      {Object.entries(objects).map(([label, data]) => (
+        // 'data' contains { type, params, color }
+        <ExistingObjectItem label={label} {...data} key={label} />
       ))}
     </ObjectsListDiv>
   );
@@ -50,7 +41,8 @@ function ExistingObjectItem({ label, type, params, color }) {
 
           <ItemEditArea
             {...{ label, type, params }}
-            closeFn={() => setBeingEdited(false)} />
+            closeFn={() => setBeingEdited(false)}
+          />
         </>
       ) : (
         <ListItemHead>

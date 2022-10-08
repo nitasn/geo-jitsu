@@ -1,16 +1,11 @@
 import React from 'react';
-import { useDispatch } from 'react-redux';
 import * as Ionicons from 'react-ionicons';
-import { removeDrawable, setParams } from '../redux/drawables';
-import {
-  EditAreaGrid,
-  EditAreaLabel,
-  EditAreaInput,
-  CancelUpdateDeleteDiv,
-  IconBtn,
-} from './style';
-import { delPoint, setPoint } from '../redux/points';
+import { useDispatch } from 'react-redux';
+import { delObj, setParams } from '../redux/objects';
 import { _mapValuesToStrings, _validateAndMapParamsFromStrings } from './strRepr';
+import {
+  CancelUpdateDeleteDiv, EditAreaGrid, EditAreaInput, EditAreaLabel, IconBtn
+} from './style';
 
 export function ItemEditArea({ label, type, params: originalParams, closeFn }) {
   const baseId = React.useId();
@@ -29,16 +24,12 @@ export function ItemEditArea({ label, type, params: originalParams, closeFn }) {
     if (!newParams) {
       return alert('invalid params.');
     }
-    dispatch(
-      type == 'Point'
-        ? setPoint([label, newParams.coords])
-        : setParams([label, newParams])
-    );
+    dispatch(setParams([label, newParams]));
     closeFn();
   };
 
   const onDeleteClick = () => {
-    dispatch((type == 'Point' ? delPoint : removeDrawable)(label));
+    dispatch(delObj(label));
   };
 
   return (
@@ -84,5 +75,3 @@ function EraseCancelUpdate({ onCancelClick, onUpdateClick, onDeleteClick }) {
     </CancelUpdateDeleteDiv>
   );
 }
-
-

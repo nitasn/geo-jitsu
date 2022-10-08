@@ -1,9 +1,9 @@
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { delPoint, setPoint } from '../../redux/points';
+import { setObj, delObj, setParams } from '../../redux/objects';
 import { fromCanvasCoords, toCanvasCoords } from '../conversions';
 
-export default function Point({ location, label }) {
+export default function Point({ location, label, color = 'yellow' } = {}) {
   useSelector((state) => state.grid); // triger rerender when the grid state changes
 
   const whereInTheWorld = React.useRef(location);
@@ -15,14 +15,14 @@ export default function Point({ location, label }) {
   const dispatch = useDispatch();
 
   React.useEffect(() => {
-    dispatch(setPoint([label, whereInTheWorld.current]));
-    return () => dispatch(delPoint({ label }));
+    dispatch(setObj([label, ['Point', { coords: whereInTheWorld.current }, color]]));
+    return () => dispatch(delObj(label));
   }, []);
 
   const ref = React.useRef();
 
   useDragAroundOnCanvas(ref, {
-    onMouseMove: (pos) => dispatch(setPoint([label, fromCanvasCoords(pos)])),
+    onMouseMove: (pos) => dispatch(setParams([label, { coords: fromCanvasCoords(pos) }])),
     onMouseUp: (pos) => (whereInTheWorld.current = fromCanvasCoords(pos)),
   });
 
@@ -38,7 +38,7 @@ export default function Point({ location, label }) {
       style={{
         width: diameter,
         height: diameter,
-        backgroundColor: 'yellow',
+        backgroundColor: color,
         border: '1px solid #333',
         borderRadius: '100vmax',
         position: 'absolute',
@@ -110,8 +110,8 @@ function useDragAroundOnCanvas(ref, { onMouseMove, onMouseUp }) {
 }
 
 function useMoveSelfAccordingToPointsSlice(whereInTheWorld, label) {
-  const points = useSelector((state) => state.points);
-  const [x, y] = points[label] ?? [];
+  const me = useSelector((state) => state.objects[label]);
+  const [x, y] = me?.coords ?? [];
   if (x != undefined && y != undefined) {
     whereInTheWorld.current = [x, y];
   }

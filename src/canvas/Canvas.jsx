@@ -88,15 +88,7 @@ function clearCanvas(ctx) {
   ctx.clearRect(0, 0, grid.width, grid.height);
 }
 
-function drawDrawables(ctx) {
-  const { points, drawables } = store.getState();
-  // we have to ask for the points here, instaed of passing them from useAllDrawings's useEffect...
-  // explanation:
-  // on the Canvas' first render, useAllDrawings is invoked; it then stores the `points` in its closure,
-  // and schedules its effect for after whole Canvas (especially its react-rendered children - e.g. points) are rendered.
-  // the problem is - when the effect callback is invoked firstly invoked, the `points` are retrieved from the closure,
-  // but it's still empty, because it was created before the react-rendered children (e.g. points) were mounted.
-
+function drawDrawables(ctx, points, drawables) {
   Object.values(drawables).forEach(({ type, params, color }) => {
     const originalStrokeStyle = ctx.strokeStyle;
     ctx.strokeStyle = color;
@@ -105,15 +97,14 @@ function drawDrawables(ctx) {
   });
 }
 
-function useAllDrawings(ctx, points) {
+function useAllDrawings(ctx, points, restObjects) {
   const grid = useSelector((state) => state.grid);
-  const drawables = useSelector((state) => state.drawables);
 
   const drawAll = () => {
     if (!ctx) return;
     clearCanvas(ctx);
     drawGridLines(ctx);
-    drawDrawables(ctx);
+    drawDrawables(ctx, points, restObjects);
   };
 
   React.useEffect(() => {
@@ -122,7 +113,17 @@ function useAllDrawings(ctx, points) {
     return () => window.removeEventListener('resize', _drawAll);
   }, []);
 
-  React.useEffect(drawAll, [grid, ctx, points, drawables]);
+  React.useEffect(drawAll, [grid, ctx, points, restObjects]);
+}
+
+export function useSeparatePointsAndRestObjects() {
+  const objectsSlice = useSelector((state) => state.objects);
+  const points = {};
+  const rest = {};
+  Object.entries(objectsSlice).forEach(([label, data]) => {
+    (data.type == 'Point' ? points : rest)[label] = data;
+  });
+  return [points, rest];
 }
 
 export default () => {
@@ -134,12 +135,12 @@ export default () => {
   useDragToScroll(canvasRef);
 
   const ctx = useCtx(canvasRef);
-  const points = useSelector((state) => state.points);
-  useAllDrawings(ctx, points);
+  const [points, restObjects] = useSeparatePointsAndRestObjects();
+  useAllDrawings(ctx, points, restObjects);
 
   const pointsElements = React.useMemo(() => {
-    return Object.entries(points).map(([label, location]) => (
-      <Point {...{ label, location }} key={label} />
+    return Object.entries(points).map(([label, { color, params }]) => (
+      <Point label={label} location={params.coords} color={color} key={label} />
     ));
   }, [points]); // todo what if we only depend on points.length?
 

@@ -1,10 +1,4 @@
-import {
-  distance,
-  vecAbs,
-  vecAdd,
-  vecDot,
-  vecSub,
-} from '../../math-utils';
+import { distance, vecAbs, vecAdd, vecDot, vecSub } from '../../math-utils';
 import store from '../../redux/store';
 import {
   fromCanvasCoords,
@@ -16,8 +10,7 @@ import {
   toCanvasDistance,
 } from '../conversions';
 
-// todo dry the "if (typeof to === 'string') to = points[to];" thing out
-//  and also why am i passing the points global state all over the place?
+// todo dry the "if (typeof to === 'string') to = points[to]?.params?.coords;" thing out
 
 /**
  * @param {{
@@ -26,14 +19,13 @@ import {
  *   style?: object
  * }}
  * @param {CanvasRenderingContext2D} ctx passed by an effect of the Canvas
- * @param {object} points a slice of the global state, notably - where each labeled point is
  */
 export function LineSegment({ from, to }, ctx, points) {
   if (typeof from === 'string') {
-    from = points[from];
+    from = points[from]?.params?.coords;
   }
   if (typeof to === 'string') {
-    to = points[to];
+    to = points[to]?.params?.coords;
   }
 
   if (!from || !to)
@@ -92,13 +84,13 @@ export function Circle({ center, radius, passingThrough }, ctx, points) {
   }
 
   if (typeof center === 'string') {
-    center = points[center];
+    center = points[center]?.params?.coords;
   }
 
   if (!center) return console.warn('Circle draw failed: param `passingThrough` is unset');
 
   if (typeof passingThrough === 'string') {
-    passingThrough = points[passingThrough];
+    passingThrough = points[passingThrough]?.params?.coords;
 
     if (!passingThrough)
       return console.warn('Circle draw failed: param `passingThrough` is unset');
@@ -127,10 +119,10 @@ function slope([x1, y1], [x2, y2]) {
 
 export function PerpendicularBisector({ left, right }, ctx, points) {
   if (typeof left === 'string') {
-    left = points[left];
+    left = points[left]?.params?.coords;
   }
   if (typeof right === 'string') {
-    right = points[right];
+    right = points[right]?.params?.coords;
   }
 
   if (!left || !right)
@@ -146,16 +138,14 @@ export function PerpendicularBisector({ left, right }, ctx, points) {
 }
 
 export function AngleBisector({ left, middle, right }, ctx, points) {
-  const { grid } = store.getState();
-
   if (typeof left === 'string') {
-    left = points[left];
+    left = points[left]?.params?.coords;
   }
   if (typeof right === 'string') {
-    right = points[right];
+    right = points[right]?.params?.coords;
   }
   if (typeof middle === 'string') {
-    middle = points[middle];
+    middle = points[middle]?.params?.coords;
   }
 
   const [A, B] = [vecSub(left, middle), vecSub(right, middle)];

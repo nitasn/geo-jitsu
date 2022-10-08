@@ -1,7 +1,9 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const slice = createSlice({
-  name: 'drawables',
+  name: 'objects',
+
+  /** @type {Object.<string, {type: string, params: object, color: string}>} */
   initialState: {
     ln1: {
       type: 'LineSegment',
@@ -19,6 +21,20 @@ const slice = createSlice({
       },
       color: 'white',
     },
+    A: {
+      type: 'Point',
+      params: {
+        coords: [3, 1]
+      },
+      color: 'orange'
+    },
+    B: {
+      type: 'Point',
+      params: {
+        coords: [1, -1]
+      },
+      color: '#663399'
+    },
   },
 
   reducers: {
@@ -28,14 +44,14 @@ const slice = createSlice({
     setColor: (state, { payload: [label, color] }) => {
       state[label].color = color;
     },
-    removeDrawable: (state, { payload: label }) => {
+    delObj: (state, { payload: label }) => {
       delete state[label];
     },
-    setDrawable: (state, { payload: [label, { type, params, color }] }) => {
+    setObj: (state, { payload: [label, [type, params, color]] }) => {
       state[label] = { type, params, color };
     },
   },
 });
 
-export const { setParams, setColor, removeDrawable, setDrawable } = slice.actions;
+export const { setParams, setColor, delObj, setObj } = slice.actions;
 export default slice.reducer;
