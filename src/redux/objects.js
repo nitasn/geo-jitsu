@@ -5,7 +5,7 @@ const slice = createSlice({
 
   /** @type {Object.<string, {type: string, params: object, color: string}>} */
   initialState: {
-    ln1: {
+    LS1: {
       type: 'LineSegment',
       params: {
         from: 'A',
@@ -13,7 +13,7 @@ const slice = createSlice({
       },
       color: 'yellow',
     },
-    ln2: {
+    LS2: {
       type: 'LineSegment',
       params: {
         from: [-1, -2],
@@ -34,6 +34,34 @@ const slice = createSlice({
         coords: [1, -1]
       },
       color: '#663399'
+    },
+    P1: {
+      "type": "Point",
+      "params": {
+        "coords": [0.9041666666666667, 0.32083333333333336]
+      },
+      "color": "lightblue"
+    },
+    P2: {
+      "type": "Point",
+      "params": {
+        "coords": [0.9125, 1.0041666666666667]
+      },
+      "color": "lightblue"
+    },
+    P3: {
+      "type": "Point",
+      "params": {
+        "coords": [1.4958333333333333, 0.8708333333333333]
+      },
+      "color": "lightblue"
+    },
+    P4: {
+      "type": "Point",
+      "params": {
+        "coords": [2.0625, 0.3352273305257162]
+      },
+      "color": "lightblue"
     },
   },
 

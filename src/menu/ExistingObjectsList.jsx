@@ -7,7 +7,7 @@ import {
   Texts,
   Type,
   Desc,
-  EditListItem,
+  EditListItemBtn,
 } from './style';
 import { ItemEditArea } from './ItemEditArea';
 import { prettyPoint } from './strRepr';
@@ -51,7 +51,7 @@ function ExistingObjectItem({ label, type, params, color }) {
             <span style={{ color }}>{label}</span>
             <Desc>{oneLineDescription(type, params)}</Desc>
           </Texts>
-          <EditListItem onClick={() => setBeingEdited(true)}>✐</EditListItem>
+          <EditListItemBtn onClick={() => setBeingEdited(true)} children="✐" />
         </ListItemHead>
       )}
     </ObjectListItem>

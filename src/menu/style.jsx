@@ -151,7 +151,7 @@ export const Desc = styled.div`
   color: rgba(255, 255, 255, 0.5);
 `;
 
-export const EditListItem = styled(_RoundButton)`
+export const EditListItemBtn = styled(_RoundButton)`
   outline: none;
 `;
 

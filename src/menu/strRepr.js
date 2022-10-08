@@ -26,13 +26,13 @@ export function _mapValuesToStrings(kvPairs) {
  * @returns {object?}
  */
 export function _validateAndMapParamsFromStrings(type, params) {
-  const { points } = store.getState();
+  const { objects } = store.getState();
 
   // todo the type should play a role...
   const results = { ...params };
 
   for (const [key, value] of Object.entries(params)) {
-    if (value in points && key != value) continue; // if the value is the label of an existing (different) point
+    if (value in objects && key != value) continue; // if the value is the label of an existing object
 
     const asNumArr = value.split(',').map((str) => +str.trim());
     if (asNumArr.length != 2 || isNaN(asNumArr[0]) || isNaN(asNumArr[1])) return null;

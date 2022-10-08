@@ -116,7 +116,7 @@ function useAllDrawings(ctx, points, restObjects) {
   React.useEffect(drawAll, [grid, ctx, points, restObjects]);
 }
 
-export function useSeparatePointsAndRestObjects() {
+function useSeparatePointsAndRestObjects() {
   const objectsSlice = useSelector((state) => state.objects);
   const points = {};
   const rest = {};

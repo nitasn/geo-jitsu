@@ -4,6 +4,7 @@ import { MenuDiv, MenuHeader, Head, Hr, AddObjBtn, SlidingButton } from './style
 import { MenuNewObj } from './MenuNewObj';
 import { ExistingObjectsList } from './ExistingObjectsList';
 import { setObj } from '../redux/objects';
+import store from '../redux/store';
 
 export default () => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -14,8 +15,8 @@ export default () => {
     setIsAddOpen(false);
     if (!item) return;
     const type = item.replace(/\s+/g, ''); // "Line Segment" -> "LineSegment"
-    const label = Math.random().toString(36).slice(2);
-    dispatch(setObj(label, [type, defaultParams(type), 'lightblue']));
+    const label = shortestAvailableName(type);
+    dispatch(setObj([label, [type, defaultParams(type), 'lightblue']]));
   };
 
   return (
@@ -48,11 +49,19 @@ function defaultParams(type) {
   }
 }
 
+function shortestAvailableName(type) {
+  const initials = type.match(/[A-Z]/g).join('');
+  const { objects } = store.getState();
+  let i = 1;
+  do {
+    const name = initials + i;
+    if (!(name in objects)) return name;
+    i++;
+  } while (true);
+}
+
 /**
  * todo
- *
- * 1. one slice for drawables and points called objects.
- *    also, this state should include "is-being-edited" and "is-valid" fields.
  *
  * 2. if a drawable uses invalid values (labels of non-existing points)
  *    the drawable won't be drawn, and its box in the menu will be clearly mark;
