@@ -107,20 +107,22 @@ function drawDrawables(ctx) {
 
 function useAllDrawings(ctx, points) {
   const grid = useSelector((state) => state.grid);
+  const drawables = useSelector((state) => state.drawables);
+
+  const drawAll = () => {
+    if (!ctx) return;
+    clearCanvas(ctx);
+    drawGridLines(ctx);
+    drawDrawables(ctx);
+  };
 
   React.useEffect(() => {
-    if (!ctx) return; // for the first render, before canvasRef.current gets a value
+    const _drawAll = drawAll;
+    window.addEventListener('resize', _drawAll);
+    return () => window.removeEventListener('resize', _drawAll);
+  }, []);
 
-    function drawAll() {
-      clearCanvas(ctx);
-      drawGridLines(ctx);
-      drawDrawables(ctx);
-    }
-
-    drawAll();
-    window.addEventListener('resize', drawAll); // todo the event listener doesn't have to be rewired when the grid moves...
-    return () => window.removeEventListener('resize', drawAll);
-  }, [grid, ctx, points]);
+  React.useEffect(drawAll, [grid, ctx, points, drawables]);
 }
 
 export default () => {
@@ -149,7 +151,6 @@ export default () => {
     </div>
   );
 };
-
 
 /**
  * (1) why 'ctx &&'

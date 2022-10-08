@@ -54,5 +54,4 @@ export function _validateAndMapParamsFromStrings(type, params) {
  *    the drawable won't be drawn, and its box in the menu will be clearly mark;
  *    the wrong label will be red, and on hover a tool tip will explain the problem.
  *
- * 3. points should be listed too.
  */
