@@ -17,7 +17,7 @@ export const MenuDiv = styled.div`
   z-index: 1;
 
   border-radius: 0.5rem;
-  background-color: rgb(33 33 33 / .85);
+  background-color: rgb(33 33 33 / 0.85);
 
   transition: var(--transition);
   user-select: none;
@@ -53,7 +53,7 @@ const _RoundButton = styled.div`
   --size: 2rem;
   height: var(--size);
   width: var(--size);
-  border-radius: 100%;
+  border-radius: 100vmax;
   background-color: rgba(255, 255, 255, 0.3);
 
   text-align: center;
@@ -63,6 +63,7 @@ const _RoundButton = styled.div`
 
   outline: #777 solid 1px;
   outline-offset: 4px;
+  -moz-outline-radius: 100vmax;
 
   transition: transform 200ms ease-in-out;
   box-shadow: var(--shadow);
@@ -102,24 +103,25 @@ export const ObjectsListDiv = styled.div`
   flex-direction: column;
   gap: 1rem;
 
-  max-height: calc(100% - 8rem);
+  max-height: calc(100% - 8.25rem);
 
-  /* todo only when overflowing */
-
-  /* 
-  padding-right: 0.5rem; 
   overflow-y: scroll;
+
+  margin-right: -11px;
+  padding-right: 7px;
 
   &::-webkit-scrollbar {
     width: 4px;
     background-color: transparent;
   }
-
   &::-webkit-scrollbar-thumb {
-    background-color: rgb(50 50 50);
     border-radius: 100vmax;
+    transition: background-color 200ms linear; // todo transition doesn't work
+    background-color: transparent;
   }
-  */
+  &:hover::-webkit-scrollbar-thumb {
+    background-color: rgb(52 52 52);
+  }
 `;
 
 export const ObjectListItem = styled.div`
@@ -225,6 +227,12 @@ export const ListNewObj = styled.ol`
 
     /* forward pointer events to the elements behind me */
     pointer-events: none;
+  }
+
+  overflow-y: scroll;
+
+  &::-webkit-scrollbar {
+    width: 0;
   }
 `;
 
