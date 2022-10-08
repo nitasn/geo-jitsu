@@ -42,16 +42,3 @@ export function _validateAndMapParamsFromStrings(type, params) {
 
   return results;
 }
-
-/**
- * todo
- *
- * 1. on any item params change,
- *    it doesn't trigger canvas re-render rn...
- *    until i drag the grid around...
- *
- * 2. if a drawable uses invalid values (labels of non-existing points)
- *    the drawable won't be drawn, and its box in the menu will be clearly mark;
- *    the wrong label will be red, and on hover a tool tip will explain the problem.
- *
- */

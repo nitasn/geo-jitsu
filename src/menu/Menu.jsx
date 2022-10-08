@@ -63,3 +63,15 @@ function defaultParams(type) {
       return { center: [-1, -1], radius: 1 };
   }
 }
+
+/**
+ * todo
+ * 
+ * 1. one slice for drawables and points called objects.
+ *    also, this state should include "is-being-edited" and "is-valid" fields.
+ *
+ * 2. if a drawable uses invalid values (labels of non-existing points)
+ *    the drawable won't be drawn, and its box in the menu will be clearly mark;
+ *    the wrong label will be red, and on hover a tool tip will explain the problem.
+ *
+ */
