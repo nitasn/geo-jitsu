@@ -7,7 +7,7 @@ import { setObj } from '../redux/objects';
 import store from '../redux/store';
 
 export default () => {
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = React.useState(true);
   const [isAddOpen, setIsAddOpen] = React.useState(false);
   const dispatch = useDispatch();
 
@@ -46,6 +46,10 @@ function defaultParams(type) {
       return { center: [-1, -1], radius: 1 };
     case 'Point':
       return { coords: [0, 0] };
+    case 'PerpendicularBisector':
+      return { left: [-1, -1], right: [1, 1] };
+    case 'AngleBisector':
+      return { left: [-1, -1], middle: [0, 1], right: [1, 1] };
   }
 }
 

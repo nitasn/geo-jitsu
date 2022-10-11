@@ -134,27 +134,36 @@ export const ObjectListItem = styled.div`
   box-shadow: var(--shadow);
 `;
 
-export const ListItemHead = styled(Head)`
+export const ObjTxtRow = styled.div`
+  display: flex;
+  gap: 1.15ch;
+  align-items: center;
+
   &[open] {
-    margin-bottom: 1.75rem;
+    padding-bottom: 1rem;
   }
 `;
 
-export const Texts = styled.div`
-  display: flex;
-  gap: 1.15ch;
-`;
-
 export const Type = styled.div`
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.2);
+  position: absolute;
+  top: 4px;
+  /* left: 4px; */
+  font-size: 12px;
 `;
 
 export const Desc = styled.div`
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.7);
 `;
 
 export const EditListItemBtn = styled(_RoundButton)`
   outline: none;
+  margin-left: auto;
+
+  &[open] {
+    opacity: 0;
+    pointer-events: none;
+  }
 `;
 
 export const EditAreaGrid = styled.form`

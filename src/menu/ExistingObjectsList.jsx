@@ -3,8 +3,7 @@ import { useSelector } from 'react-redux';
 import {
   ObjectsListDiv,
   ObjectListItem,
-  ListItemHead,
-  Texts,
+  ObjTxtRow,
   Type,
   Desc,
   EditListItemBtn,
@@ -32,27 +31,23 @@ function ExistingObjectItem({ label, type, params, color }) {
     <ObjectListItem>
       {beingEdited ? (
         <>
-          <ListItemHead open>
-            <Texts>
-              <Type>{type}</Type>
-              <span style={{ color }}>{label}</span>
-            </Texts>
-          </ListItemHead>
-
+          <ObjTxtRow open>
+            <Type>{type}</Type>
+            <span style={{ color }}>{label}</span>
+            <EditListItemBtn open children="✐" />
+          </ObjTxtRow>
           <ItemEditArea
             {...{ label, type, params }}
             closeFn={() => setBeingEdited(false)}
           />
         </>
       ) : (
-        <ListItemHead>
-          <Texts>
-            <Type>{type}</Type>
-            <span style={{ color }}>{label}</span>
-            <Desc>{oneLineDescription(type, params)}</Desc>
-          </Texts>
+        <ObjTxtRow>
+          <Type>{type}</Type>
+          <span style={{ color }}>{label}</span>
+          <Desc>{oneLineDescription(type, params)}</Desc>
           <EditListItemBtn onClick={() => setBeingEdited(true)} children="✐" />
-        </ListItemHead>
+        </ObjTxtRow>
       )}
     </ObjectListItem>
   );
@@ -65,3 +60,10 @@ function oneLineDescription(type, params) {
       return `${prettyPoint(params.from)} ${prettyPoint(params.to)}`;
   }
 }
+
+/**
+ * todo get rid of the pencil button,
+ * and put the type at the right.
+ * then the entire li will get a cursor: pointer,
+ * and clicking it would make it beingEdited
+ */
